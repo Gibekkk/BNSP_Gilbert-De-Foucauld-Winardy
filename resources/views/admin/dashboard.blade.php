@@ -3,25 +3,29 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dasbor · PNSP</title>
+        <title>Dasbor · BNSP</title>
         <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     </head>
     <body>
         <header class="topbar">
             <div class="topbar-left">
-                <span class="brand-mark" aria-hidden="true">P</span>
+                <span class="brand-mark" aria-hidden="true">B</span>
                 <div class="brand-text">
-                    <strong>PNSP</strong>
+                    <strong>BNSP</strong>
                     <small>Kelola garasi &amp; pelanggan</small>
                 </div>
             </div>
             <div class="topbar-right">
                 <span class="who" id="who-email">–</span>
-                <a class="link" href="{{ route('admin.customers') }}">Verifikasi pelanggan</a>
-                <a class="link" href="{{ route('admin.garages') }}">Kelola garasi</a>
                 <a class="btn btn-sm btn-ghost-danger" href="#" id="logout-btn">Keluar</a>
             </div>
         </header>
+
+        <nav class="tabs" aria-label="Navigasi admin">
+            <a href="{{ route('admin') }}" class="tab-btn active" aria-current="page">Dasbor</a>
+            <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
+            <a href="{{ route('admin.garages') }}" class="tab-btn">Kelola garasi</a>
+        </nav>
 
         <main class="layout">
             <h2 class="page-title">Dasbor Admin</h2>
@@ -84,7 +88,7 @@
             (function () {
                 'use strict';
 
-                const TOKEN_KEY = 'pnsps_token';
+                const TOKEN_KEY = 'bnsps_token';
                 const $ = (sel) => document.querySelector(sel);
 
                 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (

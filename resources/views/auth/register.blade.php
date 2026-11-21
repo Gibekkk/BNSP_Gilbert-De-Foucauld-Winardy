@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Daftar · PNSP</title>
+        <title>Daftar · BNSP</title>
         <link rel="stylesheet" href="{{ asset('css/register.css') }}">
     </head>
     <body>
@@ -11,7 +11,7 @@
             <!-- ===== View: registration form ===== -->
             <section id="view-form" class="card" aria-label="Formulir pendaftaran pelanggan">
                 <header class="card-header">
-                    <span class="brand-mark" aria-hidden="true">P</span>
+                    <span class="brand-mark" aria-hidden="true">B</span>
                     <div>
                         <h1>Daftar Pelanggan</h1>
                         <p>Isi data diri Anda. Akun aktif setelah diverifikasi admin.</p>

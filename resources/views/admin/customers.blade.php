@@ -3,25 +3,30 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Verifikasi Pelanggan · PNSP</title>
-        <link rel="stylesheet" href="{{ asset('vendor/datatables/datatables.min.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-    </head>
-    <body>
+    <title>Verifikasi Pelanggan · BNSP</title>
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+</head>
+<body>
         <header class="topbar">
             <div class="topbar-left">
-                <span class="brand-mark" aria-hidden="true">P</span>
+                <span class="brand-mark" aria-hidden="true">B</span>
                 <div class="brand-text">
-                    <strong>PNSP</strong>
+                    <strong>BNSP</strong>
                     <small>Kelola garasi &amp; pelanggan</small>
                 </div>
             </div>
             <div class="topbar-right">
-                <a class="link" href="{{ route('admin') }}">Dasbor</a>
                 <span class="who" id="who-email">–</span>
                 <a class="btn btn-sm btn-ghost-danger" href="#" id="logout-btn">Keluar</a>
             </div>
         </header>
+
+        <nav class="tabs" aria-label="Navigasi admin">
+            <a href="{{ route('admin') }}" class="tab-btn">Dasbor</a>
+            <a href="{{ route('admin.customers') }}" class="tab-btn active" aria-current="page">Verifikasi pelanggan</a>
+            <a href="{{ route('admin.garages') }}" class="tab-btn">Kelola garasi</a>
+        </nav>
 
         <main class="layout">
             <h2 class="page-title">Verifikasi Pelanggan</h2>
@@ -65,7 +70,7 @@
             (function () {
                 'use strict';
 
-                const TOKEN_KEY = 'pnsps_token';
+                const TOKEN_KEY = 'bnsps_token';
                 const $ = (sel) => document.querySelector(sel);
                 let dtInstance = null;
                 let rowsCache = [];

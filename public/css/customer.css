@@ -1,4 +1,4 @@
-/* ===== PNSP · Portal pelanggan — per-module vanilla CSS (berbagi token dengan login.css) ===== */
+/* ===== BNSP · Portal pelanggan — per-module vanilla CSS (berbagi token dengan login.css) ===== */
 :root {
     --bg-1: #eef2fb;
     --bg-2: #f8fafd;
@@ -53,17 +53,17 @@ body {
 .page-sub { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
 
 /* ===== Tabulasi ===== */
-.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.tabs { display: flex; align-items: stretch; gap: 4px; padding: 0 26px; background: rgba(255, 255, 255, .96); border-bottom: 1px solid var(--border); }
 
 .tab-btn {
-    padding: 9px 18px; border-radius: 999px; border: 1px solid var(--border); background: #fff;
-    font: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; text-decoration: none;
-    transition: background .15s, color .15s, border-color .15s;
+    display: inline-flex; align-items: center; padding: 13px 18px;
+    font-size: 13.5px; font-weight: 600; color: var(--muted); text-decoration: none;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; cursor: pointer;
 }
 
-.tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+.tab-btn:hover { color: var(--primary); }
 
-.tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
 .panel {
     background: var(--card); border: 1px solid rgba(31, 42, 52, .06); border-radius: 16px;

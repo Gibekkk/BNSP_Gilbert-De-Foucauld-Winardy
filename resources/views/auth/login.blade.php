@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Masuk · PNSP</title>
+        <title>Masuk · BNSP</title>
         <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     </head>
     <body>
@@ -11,10 +11,10 @@
             <!-- ===== View: login form ===== -->
             <section id="view-form" class="card" aria-label="Formulir masuk">
                 <header class="card-header">
-                    <span class="brand-mark" aria-hidden="true">P</span>
+                    <span class="brand-mark" aria-hidden="true">B</span>
                     <div>
                         <h1>Masuk</h1>
-                        <p>Layanan sewa garasi PNSP. Gunakan email dan password Anda.</p>
+                        <p>Layanan sewa garasi BNSP. Gunakan email dan password Anda.</p>
                     </div>
                 </header>
 
@@ -58,7 +58,7 @@
             (function () {
                 'use strict';
 
-                const TOKEN_KEY = 'pnsps_token';
+                const TOKEN_KEY = 'bnsps_token';
                 const URL_ADMIN = '/admin';
                 const URL_TENANT = '/customer';
                 const $ = (sel) => document.querySelector(sel);

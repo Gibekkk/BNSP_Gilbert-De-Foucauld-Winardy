@@ -3,15 +3,15 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Portal Pelanggan · PNSP</title>
+        <title>Portal Pelanggan · BNSP</title>
         <link rel="stylesheet" href="{{ asset('css/customer.css') }}">
     </head>
     <body>
         <header class="topbar">
             <div class="topbar-left">
-                <span class="brand-mark" aria-hidden="true">P</span>
+                <span class="brand-mark" aria-hidden="true">B</span>
                 <div class="brand-text">
-                    <strong>PNSP</strong>
+                    <strong>BNSP</strong>
                     <small>Portal pelanggan</small>
                 </div>
             </div>
@@ -21,17 +21,16 @@
             </div>
         </header>
 
+        <nav class="tabs" aria-label="Navigasi portal">
+            <a href="?tab=garage" class="tab-btn active" data-tab="garage">Garasi</a>
+            <a href="?tab=kendaraan" class="tab-btn" data-tab="kendaraan">Kendaraan</a>
+        </nav>
+
         <main class="layout">
             <h2 class="page-title">Hello, <span id="hello-name">…</span></h2>
             <p class="page-sub">Pantau garasi dan kelola kendaraan Anda di satu tempat.</p>
 
             <div id="global-msg" class="msgbox error" role="alert" hidden></div>
-
-            <!-- ===== Tabulasi ===== -->
-            <nav class="tabs" aria-label="Navigasi portal">
-                <a href="?tab=garage" class="tab-btn active" data-tab="garage">Garasi</a>
-                <a href="?tab=kendaraan" class="tab-btn" data-tab="kendaraan">Kendaraan</a>
-            </nav>
 
             <!-- ===== Tab: Garasi (default, stub) ===== -->
             <section id="tab-garage" class="panel" aria-label="Sewa garasi">
@@ -144,7 +143,7 @@
             (function () {
                 'use strict';
 
-                const TOKEN_KEY = 'pnsps_token';
+                const TOKEN_KEY = 'bnsps_token';
                 const $ = (sel) => document.querySelector(sel);
                 let editingId = null;
                 let vehicles = [];

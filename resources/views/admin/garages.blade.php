@@ -3,19 +3,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Garasi · PNSP</title>
+    <title>Kelola Garasi · BNSP</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
 <header class="topbar">
     <div class="topbar-left">
-        <span class="brand-mark" aria-hidden="true">P</span>
-        <div class="brand-text"><strong>PNSP</strong><small>Dasbor admin</small></div>
+        <span class="brand-mark" aria-hidden="true">B</span>
+        <div class="brand-text"><strong>BNSP</strong><small>Dasbor admin</small></div>
     </div>
     <div class="topbar-right">
-        <a class="btn btn-sm btn-ghost" href="/admin">Kembali</a>
+        <span class="who" id="who-email">–</span>
+        <a class="btn btn-sm btn-ghost-danger" href="#" id="logout-btn">Keluar</a>
     </div>
 </header>
+
+<nav class="tabs" aria-label="Navigasi admin">
+    <a href="{{ route('admin') }}" class="tab-btn">Dasbor</a>
+    <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
+    <a href="{{ route('admin.garages') }}" class="tab-btn active" aria-current="page">Kelola garasi</a>
+</nav>
 
 <main class="layout">
     <h2 class="page-title">Kelola garasi</h2>
@@ -128,7 +135,7 @@
 (function () {
     'use strict';
 
-    const TOKEN_KEY = 'pnsps_token';
+    const TOKEN_KEY = 'bnsps_token';
     const $ = (sel) => document.querySelector(sel);
 
     function token() { return localStorage.getItem(TOKEN_KEY); }
@@ -419,9 +426,27 @@
         });
     }
 
+    $('#logout-btn').addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const saved = token();
+        localStorage.removeItem(TOKEN_KEY);
+
+        if (saved) {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + saved },
+                });
+            } catch (_) { /* token sudah tidak valid */ }
+        }
+
+        window.location.replace('/login');
+    });
+
     async function boot() {
         if (!token()) {
-            window.location.replace('/admin');
+            window.location.replace('/login');
             return;
         }
 
@@ -429,18 +454,22 @@
 
         try {
             const res = await fetch('/api/me', { headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token() } });
-
-            if (res.ok) {
-                const d = await res.json().catch(() => ({}));
-                me = d.data || null;
+            if (!res.ok) {
+                throw new Error('Sesi tidak valid.');
             }
-        } catch (_) { /* error jaringan/sesi akan muncul sendiri dari endpoint berikutnya */ }
-
-        if (!me || !me.is_admin) {
-            window.location.replace('/admin');
+            me = (await res.json().catch(() => ({}))).user || null;
+        } catch (_) {
+            localStorage.removeItem(TOKEN_KEY);
+            window.location.replace('/login');
             return;
         }
 
+        if (!me || !me.is_admin) {
+            window.location.replace(me ? '/customer' : '/login');
+            return;
+        }
+
+        $('#who-email').textContent = me.email;
         wire();
         loadCapacities();
         loadList();

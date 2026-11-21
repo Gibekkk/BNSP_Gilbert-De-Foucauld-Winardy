@@ -1,4 +1,4 @@
-/* ===== PNSP · Portal admin — per-module vanilla CSS (berbagi token dengan login.css) ===== */
+/* ===== BNSP · Portal admin — per-module vanilla CSS (berbagi token dengan login.css) ===== */
 :root {
     --bg-1: #eef2fb;
     --bg-2: #f8fafd;
@@ -61,6 +61,12 @@ body {
 
 a.link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 13.5px; }
 a.link:hover { text-decoration: underline; }
+
+/* ===== Navigasi tab di bawah header (kesan SPA) ===== */
+.tabs { display: flex; align-items: stretch; gap: 4px; padding: 0 26px; background: rgba(255, 255, 255, .96); border-bottom: 1px solid var(--border); }
+.tabs a.tab-btn { display: inline-flex; align-items: center; padding: 13px 18px; font-size: 13.5px; font-weight: 600; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; cursor: pointer; transition: color .15s ease; }
+.tabs a.tab-btn:hover { color: var(--primary); }
+.tabs a.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
 .layout { max-width: 1180px; margin: 0 auto; padding: 28px 24px 70px; }
 
