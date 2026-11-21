@@ -1,0 +1,33 @@
+{
+  description = "laravel shell";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    nur ={
+     url = "git+https://github.com/nix-community/NUR";
+     inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, nixpkgs-unstable, nur, ... }@inputs:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      pkgs-unstable = import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+      };
+    in
+    {
+      devShells.${system}.default = pkgs.mkShell {
+        packages = [
+         pkgs.phpPackages.composer
+         pkgs.php
+        ];
+      };
+    };
+}
