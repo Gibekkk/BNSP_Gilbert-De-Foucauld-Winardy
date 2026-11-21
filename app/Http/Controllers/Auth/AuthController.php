@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth as JWT;
@@ -17,12 +18,30 @@ class AuthController extends Controller
 {
     /**
      * Register a new customer: create the Customer (pending) and its login account.
+     * Email/NIK uniqueness is enforced here so declined accounts can re-register.
      */
     public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        $user = DB::transaction(function () use ($data) {
+        $email = mb_strtolower(trim($data['email']));
+        $nik = trim($data['nik']);
+
+        if ($this->hasActiveAccountForEmail($email)) {
+            return response()->json([
+                'message' => 'Email sudah terdaftar.',
+                'errors' => ['email' => ['Email sudah terdaftar.']],
+            ], 422);
+        }
+
+        if (Customer::query()->where('nik', $nik)->where('status', '!=', Customer::STATUS_DECLINED)->exists()) {
+            return response()->json([
+                'message' => 'NIK sudah terdaftar.',
+                'errors' => ['nik' => ['NIK sudah terdaftar.']],
+            ], 422);
+        }
+
+        $user = DB::transaction(function () use ($data, $email) {
             $customer = Customer::create([
                 'nik' => $data['nik'],
                 'phone' => $data['phone'],
@@ -31,7 +50,7 @@ class AuthController extends Controller
             ]);
 
             return User::create([
-                'email' => $data['email'],
+                'email' => $email,
                 'password' => $data['password'],
                 'customer_id' => $customer->id,
                 'is_admin' => false,
@@ -49,15 +68,36 @@ class AuthController extends Controller
 
     /**
      * Authenticate with email + password and issue a JWT token.
-     * Admins always pass; tenants only when their customer status is "accepted".
+     * The newest non-declined account for the email wins; admins always pass;
+     * tenants only when their customer status is "accepted".
      */
     public function login(LoginRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        $user = User::with('customer')->firstWhere('email', $data['email']);
+        $email = mb_strtolower(trim($data['email']));
 
-        if ($user === null || ! Hash::check($data['password'], $user->password)) {
+        /** @var Collection<int, User> $candidates */
+        $candidates = User::query()
+            ->where('email', $email)
+            ->with('customer')
+            ->orderByDesc('id')
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return response()->json(['message' => 'Email atau password salah.'], 401);
+        }
+
+        $user = $candidates->first(fn (User $candidate): bool => ! $this->isDeclinedAccount($candidate));
+
+        if ($user === null) {
+            return response()->json(
+                ['message' => 'Akun ditolak oleh admin. Anda dapat mendaftarkan ulang.'],
+                403,
+            );
+        }
+
+        if (! Hash::check($data['password'], $user->password)) {
             return response()->json(['message' => 'Email atau password salah.'], 401);
         }
 
@@ -106,11 +146,42 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout: stateless JWT has no server store; the client discards its token.
+     * Logout: invalidate the current JWT so it can no longer be used.
+     * A missing or already-invalid token still returns the same success.
      */
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
+        try {
+            if ($request->bearerToken() !== null) {
+                JWT::setToken($request->bearerToken())->invalidate();
+            }
+        } catch (\Throwable) {
+            // The token was missing or already invalid — nothing to invalidate.
+        }
+
         return response()->json(['message' => 'Anda telah keluar.']);
+    }
+
+    /**
+     * True when a non-declined account (or an admin) already uses this email.
+     */
+    private function hasActiveAccountForEmail(string $email): bool
+    {
+        return User::query()
+            ->where('email', $email)
+            ->where(function ($query): void {
+                $query->whereNull('customer_id')
+                    ->orWhereHas('customer', fn ($c) => $c->where('status', '!=', Customer::STATUS_DECLINED));
+            })
+            ->exists();
+    }
+
+    /**
+     * Declined accounts are terminal and can never log in again.
+     */
+    private function isDeclinedAccount(User $user): bool
+    {
+        return ! $user->is_admin && $user->customer?->status === Customer::STATUS_DECLINED;
     }
 
     /**

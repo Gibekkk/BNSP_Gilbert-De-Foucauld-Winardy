@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['count', 'rent_price', 'charge_price_kwh'])]
+#[Fillable(['count'])]
 class GarageType extends Model
 {
     /** @use HasFactory<GarageTypeFactory> */
@@ -33,8 +33,7 @@ class GarageType extends Model
     protected function casts(): array
     {
         return [
-            'rent_price' => 'integer',
-            'charge_price_kwh' => 'integer:null',
+            'count' => 'integer',
         ];
     }
 }

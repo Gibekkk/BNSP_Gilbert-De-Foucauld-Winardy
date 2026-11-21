@@ -8,13 +8,17 @@ return new class extends Migration
 {
     /**
      * Membuat tabel garages. ID berformat prefix + 3 digit (contoh S001, C010).
-     * Harga tidak disimpan di sini, melainkan di tabel garage_types.
+     * Setiap garasi menyimpan harganya sendiri dalam rupiah (integer):
+     * rent_price adalah harga sewa harian, charge_price_kwh hanya diisi
+     * untuk garasi mobil listrik (tipe E).
      */
     public function up(): void
     {
         Schema::create('garages', function (Blueprint $table) {
             $table->string('id', 4)->primary();
             $table->string('garage_type_id', 1);
+            $table->unsignedInteger('rent_price');
+            $table->unsignedInteger('charge_price_kwh')->nullable();
             $table->boolean('is_used')->default(false);
             $table->timestamps();
 
