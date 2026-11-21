@@ -5,8 +5,14 @@ namespace App\Http\Requests;
 use App\Models\Garage;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validasi perubahan harga satu garasi oleh admin.
+ */
 class UpdateGarageRequest extends FormRequest
 {
+    /**
+     * Hak akses sudah dijaga oleh middleware route.
+     */
     public function authorize(): bool
     {
         return true;
@@ -32,6 +38,8 @@ class UpdateGarageRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

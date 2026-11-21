@@ -12,12 +12,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 
 /**
- * Aggregate numbers for the admin dashboard template.
+ * Angka ringkasan untuk dasbor admin.
  */
 class DashboardController extends Controller
 {
     /**
-     * Return counts per status, garage/rental totals, and the ten newest registrations.
+     * Kembalikan jumlah pelanggan per status, total garasi/sewa, dan sepuluh pendaftaran terbaru.
      */
     public function index(GarageService $garages): JsonResponse
     {
@@ -48,8 +48,8 @@ class DashboardController extends Controller
     }
 
     /**
-     * Rent + charging + extension income of rentals that started this month
-     * (income is counted on the rental's start_date, same as the reports).
+     * Pendapatan sewa (termasuk isi listrik) + perpanjangan dari sewa yang dimulai bulan ini
+     * (pendapatan dihitung pada start_date sewa, sama seperti laporan).
      */
     private function incomeThisMonth(): int
     {
@@ -59,12 +59,12 @@ class DashboardController extends Controller
             ->get();
 
         return (int) $rentals->sum(
-            fn (Transaction $t): int => (int) $t->rent_price_total + (int) $t->charge_price_total + (int) $t->extensions_sum_extra_rent,
+            fn (Transaction $t): int => (int) $t->rent_price_total + (int) $t->extensions_sum_extra_rent,
         );
     }
 
     /**
-     * Fetch the newest registrations with their account email.
+     * Ambil pendaftaran terbaru beserta email akunnya.
      */
     private function latest(int $limit): Collection
     {

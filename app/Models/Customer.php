@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Data penyewa (NIK, nama, telepon) beserta status verifikasi oleh admin.
+ */
 #[Fillable(['nik', 'phone', 'name', 'status'])]
 class Customer extends Model
 {

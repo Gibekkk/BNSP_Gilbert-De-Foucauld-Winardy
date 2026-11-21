@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<GarageType>
  *
- * A garage type only knows its key and how many slots it has issued ever;
- * pricing lives on the individual garages.
+ * Tipe garasi hanya menyimpan kodenya dan jumlah garasi yang pernah diterbitkan;
+ * harga disimpan di masing-masing garasi.
  */
 class GarageTypeFactory extends Factory
 {
     /**
-     * Fresh type state (id + issuance counter only).
+     * State tipe baru (hanya kode + penghitung penerbitan).
      */
     public function definition(): array
     {
@@ -25,7 +25,7 @@ class GarageTypeFactory extends Factory
     }
 
     /**
-     * Mobil (C).
+     * State tipe Mobil (C).
      */
     public function mobil(): static
     {
@@ -33,7 +33,7 @@ class GarageTypeFactory extends Factory
     }
 
     /**
-     * Mobil listrik (E).
+     * State tipe Mobil Listrik (E).
      */
     public function mobilListrik(): static
     {

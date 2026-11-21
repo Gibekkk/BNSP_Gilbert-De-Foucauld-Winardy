@@ -14,12 +14,17 @@ use Illuminate\Validation\Rule;
  */
 class ReportRequest extends FormRequest
 {
+    /**
+     * Hak akses sudah dijaga oleh middleware route.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -38,6 +43,8 @@ class ReportRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\GarageType;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -12,6 +13,9 @@ use Illuminate\Support\Collection;
  * Setiap transaksi (termasuk seluruh biaya perpanjangannya) dihitung pada
  * tanggal MULAI sewanya (start_date). Pengelompokan dilakukan di PHP agar
  * kode yang sama berjalan di MySQL maupun SQLite.
+ *
+ * rent_price_total sudah termasuk biaya isi listrik (charge_price_total),
+ * sehingga rent_income = rent_price_total - charge_price_total.
  *
  * Kolom setiap baris laporan:
  *  rentals, rent_income, charge_income, extension_income, total
@@ -27,8 +31,6 @@ class ReportService
     public const GROUP_TENANT = 'tenant';
 
     public const GROUPS = [self::GROUP_MONTHLY, self::GROUP_DAILY, self::GROUP_TYPE, self::GROUP_TENANT];
-
-    private const TYPE_LABELS = ['S' => 'Sepeda', 'C' => 'Mobil', 'E' => 'Mobil Listrik'];
 
     private const MONTH_LABELS = [
         1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -86,7 +88,7 @@ class ReportService
             ->groupBy(fn (Transaction $t): string => $t->garage->garage_type_id);
 
         $rows = [];
-        foreach (self::TYPE_LABELS as $type => $label) {
+        foreach (GarageType::LABELS as $type => $label) {
             $rows[] = $this->row($type, $label.' ('.$type.')', $groups->get($type, collect()));
         }
 
@@ -153,8 +155,9 @@ class ReportService
      */
     private function row(string $key, string $label, Collection $items): array
     {
-        $rent = (int) $items->sum('rent_price_total');
+        // rent_price_total sudah termasuk isi listrik; dipisahkan kembali untuk laporan.
         $charge = (int) $items->sum('charge_price_total');
+        $rent = (int) $items->sum('rent_price_total') - $charge;
         $extension = (int) $items->sum(fn (Transaction $t): int => (int) $t->extensions_sum_extra_rent);
 
         return [

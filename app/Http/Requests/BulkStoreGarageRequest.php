@@ -2,9 +2,14 @@
 
 namespace App\Http\Requests;
 
+/**
+ * Validasi pembuatan garasi secara berkelompok (jumlah 1..999).
+ */
 class BulkStoreGarageRequest extends StoreGarageRequest
 {
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -19,6 +24,8 @@ class BulkStoreGarageRequest extends StoreGarageRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

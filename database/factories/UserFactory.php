@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Hash;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * Password yang sedang dipakai factory (di-hash sekali saja).
      */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Nilai bawaan model.
      *
      * @return array<string, mixed>
      */
@@ -31,7 +31,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the user is an admin account.
+     * State akun admin.
      */
     public function admin(): static
     {

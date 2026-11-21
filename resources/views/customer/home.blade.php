@@ -28,37 +28,124 @@
 
         <main class="layout">
             <h2 class="page-title">Hello, <span id="hello-name">…</span></h2>
-            <p class="page-sub">Pantau garasi dan kelola kendaraan Anda di satu tempat.</p>
+            <p class="page-sub">Sewa garasi, pantau sewaan, dan kelola kendaraan Anda di satu tempat.</p>
 
             <div id="global-msg" class="msgbox error" role="alert" hidden></div>
 
-            <!-- ===== Tab: Garasi (default, stub) ===== -->
-            <section id="tab-garage" class="panel" aria-label="Sewa garasi">
-                <div class="panel-head">
-                    <h3>Sewa Garasi</h3>
-                </div>
+            <!-- ===== Tab: Garasi (default): sewaan saya + sewa baru ===== -->
+            <div id="tab-garage">
+                <section class="panel" aria-label="Sewaan saya">
+                    <div class="panel-head">
+                        <h3>Sewaan Saya</h3>
+                        <button type="button" class="btn btn-primary" id="new-rent-btn">+ Sewa baru</button>
+                    </div>
 
-                <div class="stub-box">
-                    <h4>Pemesanan segera hadir</h4>
-                    <p>Dari tab ini Anda akan dapat memilih tipe garasi (sepeda, mobil, atau mobil listrik), melihat tarif harian, lalu memulai masa sewa. Sementara berikut daftar tipenya.</p>
-                </div>
+                    <div class="table-scroll">
+                        <table class="vtable">
+                            <thead>
+                                <tr>
+                                    <th>Garasi</th>
+                                    <th>Kendaraan</th>
+                                    <th>Tipe sewa</th>
+                                    <th>Periode</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rent-body">
+                                <tr class="empty-row"><td colspan="6">Memuat data…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                <table class="type-table">
-                    <thead>
-                        <tr>
-                            <th>Tipe</th>
-                            <th>Sewa harian</th>
-                            <th>Tarif listrik</th>
-                        </tr>
-                    </thead>
-                    <tbody id="type-body">
-                        <tr class="empty-row"><td colspan="3">Memuat data…</td></tr>
-                    </tbody>
-                </table>
+                    <details id="history-wrap" hidden>
+                        <summary class="muted" style="cursor:pointer;margin-top:12px">Riwayat sewa (<span id="history-count">0</span>)</summary>
+                        <div class="table-scroll">
+                            <table class="vtable">
+                                <tbody id="history-body"></tbody>
+                            </table>
+                        </div>
+                    </details>
+                </section>
 
-                <button type="button" class="btn btn-disabled" disabled>Mulai sewa</button>
-                <span class="stub-note">Fitur pemesanan akan segera tersedia.</span>
-            </section>
+                <!-- ===== Form sewa baru ===== -->
+                <section class="panel" id="rent-panel" aria-label="Sewa baru" hidden>
+                    <div class="panel-head">
+                        <h3>Sewa Baru</h3>
+                        <a href="#" class="muted" id="rent-cancel">Batal</a>
+                    </div>
+
+                    <div id="rent-msg" class="msgbox error" role="alert" hidden></div>
+
+                    <form id="rent-form" class="rent-steps" novalidate>
+                        <div class="rent-step">
+                            <h4><span class="num">1</span>Kendaraan</h4>
+                            <div class="field">
+                                <select id="r-vehicle"></select>
+                            </div>
+                            <p class="muted" id="r-vehicle-note" hidden>Belum ada kendaraan. Tambahkan kendaraan terlebih dahulu di tab <a href="?tab=kendaraan" class="link" id="go-vehicles">Kendaraan</a>.</p>
+                        </div>
+
+                        <div class="rent-step">
+                            <h4><span class="num">2</span>Tipe sewa &amp; tanggal</h4>
+                            <div class="seg" role="tablist" aria-label="Tipe sewa">
+                                <button type="button" data-monthly="0" class="active">Harian</button>
+                                <button type="button" data-monthly="1">Bulanan</button>
+                            </div>
+                            <div class="form-grid" style="margin-top:12px">
+                                <div class="field" id="r-days-wrap">
+                                    <label for="r-days">Jumlah hari</label>
+                                    <input type="number" id="r-days" min="1" step="1" value="1" inputmode="numeric">
+                                    <span class="muted" id="r-days-hint"></span>
+                                </div>
+                                <div class="field">
+                                    <label for="r-start">Tanggal mulai sewa</label>
+                                    <input type="date" id="r-start" readonly disabled>
+                                </div>
+                                <div class="field">
+                                    <label for="r-end">Tanggal selesai sewa</label>
+                                    <input type="date" id="r-end" readonly disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rent-step">
+                            <h4><span class="num">3</span>Tipe garasi &amp; garasi tersedia hari ini</h4>
+                            <div class="field" style="max-width:280px">
+                                <select id="r-type"></select>
+                            </div>
+                            <div class="garage-grid" id="r-garages" style="margin-top:10px"></div>
+                        </div>
+
+                        <div class="rent-step" id="r-battery-step" hidden>
+                            <h4><span class="num">4</span>Sisa baterai saat ini</h4>
+                            <div class="field" style="max-width:280px">
+                                <label for="r-battery">Sisa baterai (kWh)</label>
+                                <input type="number" id="r-battery" min="0" step="1" inputmode="numeric">
+                                <span class="muted" id="r-battery-hint"></span>
+                            </div>
+                        </div>
+
+                        <div class="rent-step">
+                            <h4><span class="num" id="r-proof-num">4</span>Total biaya &amp; bukti pelunasan</h4>
+                            <div class="quote-box">
+                                <div class="muted">Total biaya sewa (dihitung sistem)</div>
+                                <div class="quote-total" id="r-total">–</div>
+                                <ul id="r-breakdown"></ul>
+                            </div>
+                            <div class="field" style="margin-top:12px;max-width:360px">
+                                <label for="r-proof">Bukti pelunasan biaya (gambar)</label>
+                                <input type="file" id="r-proof" accept="image/png,image/jpeg,image/webp">
+                                <span class="muted">JPG / PNG / WEBP, maks. 5 MB.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="r-submit">Simpan sewa</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
 
             <!-- ===== Tab: Kendaraan ===== -->
             <section id="tab-kendaraan" class="panel" aria-label="Kendaraan saya" hidden>
@@ -198,35 +285,363 @@
 
                 window.addEventListener('popstate', () => { showTab(currentTab()); });
 
-                /* ===== Data garasi (stub) ===== */
-                async function loadGarages() {
-                    const body = $('#type-body');
+                /* ===== Tab Garasi: sewaan saya ===== */
+                const fmtDate = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '–';
+
+                function vehicleText(v) {
+                    return esc(TYPE_TEXT[v.type] || v.type || '-') + '<div class="muted">' + esc([v.license_plate, v.brand].filter(Boolean).join(' · ')) + '</div>';
+                }
+
+                function rentalRow(r, isActive) {
+                    const ext = r.extensions.length ? '<div class="muted">+ perpanjangan ' + rp(r.extension_total) + '</div>' : '';
+                    const charge = r.charge_price_total ? '<div class="muted">termasuk isi listrik ' + rp(r.charge_price_total) + '</div>' : '';
+                    const proof = r.transaction_proof_url ? ' · <a class="link" href="' + esc(r.transaction_proof_url) + '" target="_blank" rel="noopener">bukti</a>' : '';
+                    const status = isActive
+                        ? '<span class="chip warn">Berjalan</span>' + (r.extensions.length ? ' <span class="chip muted-chip">' + r.extensions.length + '× diperpanjang</span>' : '')
+                        : '<span class="chip muted-chip">Selesai</span>';
+
+                    return [
+                        '<tr>',
+                        '<td><strong>' + esc(r.garage_id) + '</strong><div class="muted">' + esc(r.garage_label) + '</div></td>',
+                        '<td>' + vehicleText(r.vehicle) + '</td>',
+                        '<td>' + (r.is_monthly ? 'Bulanan' : 'Harian') + '</td>',
+                        '<td>' + fmtDate(r.start_date) + ' – ' + fmtDate(r.end_date) + '</td>',
+                        '<td><strong>' + rp(r.grand_total) + '</strong>' + charge + ext + '<div class="muted">sewa ' + rp(r.rent_price_total) + proof + '</div></td>',
+                        '<td>' + status + '</td>',
+                        '</tr>',
+                    ].join('');
+                }
+
+                async function loadRentals() {
+                    const body = $('#rent-body');
 
                     try {
-                        const data = await api('/api/customer/garage-preview');
+                        const data = await api('/api/customer/rentals');
+                        const active = data.active || [];
+                        const history = data.history || [];
 
-                        body.innerHTML = '';
+                        body.innerHTML = active.length
+                            ? active.map((r) => rentalRow(r, true)).join('')
+                            : '<tr class="empty-row"><td colspan="6">Belum ada sewa yang berjalan. Klik "Sewa baru" untuk mulai menyewa.</td></tr>';
 
-                        if (!data.data.length) {
-                            body.insertAdjacentHTML('beforeend', '<tr class="empty-row"><td colspan="3">Belum ada garasi kosong.</td></tr>');
+                        $('#history-wrap').hidden = history.length === 0;
+                        $('#history-count').textContent = history.length;
+                        $('#history-body').innerHTML = history.map((r) => rentalRow(r, false)).join('');
+                    } catch (e) {
+                        body.innerHTML = '<tr class="empty-row"><td colspan="6">' + esc(e.message) + '</td></tr>';
+                    }
+                }
+
+                /* ===== Tab Garasi: sewa baru ===== */
+                const rent = {
+                    isMonthly: false,
+                    vehicle: null,
+                    garage: null,
+                    garages: [],
+                    limits: null,
+                    quoteSeq: 0,
+                    quoteTimer: null,
+                };
+
+                function rentMsg(text, kind) {
+                    flash($('#rent-msg'), text, kind);
+                    if (kind !== 'ok') {
+                        $('#rent-msg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+
+                /** Tambah n hari ke tanggal ISO (YYYY-MM-DD) tanpa terpengaruh zona waktu. */
+                function addDays(iso, n) {
+                    const [y, m, d] = iso.split('-').map(Number);
+                    return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+                }
+
+                function fillVehicleSelect() {
+                    const select = $('#r-vehicle');
+                    const keep = select.value;
+                    $('#r-vehicle-note').hidden = vehicles.length !== 0;
+                    select.disabled = vehicles.length === 0;
+                    select.innerHTML = '<option value="">— Pilih kendaraan —</option>' + vehicles.map((v) => (
+                        '<option value="' + v.id + '">' + esc((TYPE_TEXT[v.type] || v.type) + ' · ' + (v.license_plate || 'tanpa plat') + ' · ' + v.brand + ' ' + v.brand_type) + '</option>'
+                    )).join('');
+                    if (vehicles.some((v) => String(v.id) === keep)) {
+                        select.value = keep;
+                    }
+                }
+
+                function openRent() {
+                    $('#rent-panel').hidden = false;
+                    $('#rent-msg').hidden = true;
+                    fillVehicleSelect();
+                    $('#rent-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                function resetRent() {
+                    rent.vehicle = null;
+                    rent.garage = null;
+                    rent.garages = [];
+                    $('#r-vehicle').value = '';
+                    $('#r-type').innerHTML = '';
+                    $('#r-garages').innerHTML = '<p class="muted">Pilih kendaraan untuk melihat garasi yang tersedia.</p>';
+                    $('#r-battery').value = '';
+                    $('#r-proof').value = '';
+                    syncBatteryStep();
+                    resetQuote();
+                }
+
+                function closeRent() {
+                    resetRent();
+                    $('#rent-panel').hidden = true;
+                }
+
+                /** Hitung tanggal selesai di layar (server tetap menghitung ulang saat menyimpan). */
+                function syncDates() {
+                    const limits = rent.limits;
+                    $('#r-days-wrap').hidden = rent.isMonthly;
+                    if (!limits) {
+                        return;
+                    }
+
+                    $('#r-start').value = limits.start_date;
+                    const daysInput = $('#r-days');
+                    daysInput.max = limits.max_daily_days;
+                    $('#r-days-hint').textContent = 'Maksimal ' + limits.max_daily_days + ' hari untuk bulan ini.';
+
+                    if (rent.isMonthly) {
+                        $('#r-end').value = limits.monthly_end_date;
+                    } else {
+                        const days = parseInt(daysInput.value, 10);
+                        $('#r-end').value = days >= 1 && days <= limits.max_daily_days ? addDays(limits.start_date, days - 1) : '';
+                    }
+                }
+
+                function needsBattery() {
+                    return Boolean(rent.vehicle && rent.garage && rent.vehicle.type === 'mobil_listrik' && rent.garage.type === 'E');
+                }
+
+                function syncBatteryStep() {
+                    const show = needsBattery();
+                    $('#r-battery-step').hidden = !show;
+                    $('#r-proof-num').textContent = show ? '5' : '4';
+                    if (show) {
+                        $('#r-battery').max = rent.vehicle.battery_capacity;
+                        $('#r-battery-hint').textContent = 'Kapasitas baterai ' + rent.vehicle.battery_capacity + ' kWh. Mobil wajib diisi hingga penuh; biaya isi listrik ditambahkan ke total sewa.';
+                    }
+                }
+
+                async function loadAvailable() {
+                    const grid = $('#r-garages');
+                    rent.garage = null;
+                    syncBatteryStep();
+                    resetQuote();
+
+                    if (!rent.vehicle) {
+                        $('#r-type').innerHTML = '';
+                        grid.innerHTML = '<p class="muted">Pilih kendaraan untuk melihat garasi yang tersedia.</p>';
+                        return;
+                    }
+
+                    grid.innerHTML = '<p class="muted">Memuat garasi…</p>';
+                    const params = new URLSearchParams({ vehicle_id: rent.vehicle.id });
+                    const typeSelect = $('#r-type');
+                    if (typeSelect.value) {
+                        params.set('type', typeSelect.value);
+                    }
+
+                    let data;
+                    try {
+                        data = await api('/api/customer/garages/available?' + params.toString());
+                    } catch (e) {
+                        grid.innerHTML = '<p class="muted">' + esc(e.message) + '</p>';
+                        return;
+                    }
+
+                    rent.limits = data.limits;
+                    syncDates();
+
+                    // Pilihan tipe garasi disesuaikan dengan tipe kendaraan.
+                    const current = typeSelect.value || (data.allowed_types[0] && data.allowed_types[0].key) || '';
+                    typeSelect.innerHTML = data.allowed_types.map((t) => '<option value="' + esc(t.key) + '">' + esc(t.label) + '</option>').join('');
+                    typeSelect.value = current;
+
+                    if (!data.vehicle_free) {
+                        grid.innerHTML = '<p class="muted">Kendaraan ini sedang berada di garasi lain. Satu kendaraan hanya dapat menempati satu garasi.</p>';
+                        rent.garages = [];
+                        return;
+                    }
+
+                    rent.garages = (data.data || []).filter((g) => g.type === current);
+                    if (!rent.garages.length) {
+                        grid.innerHTML = '<p class="muted">Tidak ada garasi ' + esc(typeSelect.options[typeSelect.selectedIndex]?.text || '') + ' yang tersedia hari ini.</p>';
+                        return;
+                    }
+
+                    grid.innerHTML = rent.garages.map((g) => [
+                        '<button type="button" class="garage-card" data-id="' + esc(g.id) + '">',
+                        '<strong>' + esc(g.id) + '</strong>',
+                        '<small>' + rp(g.rent_price) + ' / hari</small>',
+                        '<small>' + rp(g.monthly_price) + ' / bulan</small>',
+                        g.charge_price_kwh !== null ? '<small>Listrik ' + rp(g.charge_price_kwh) + ' / kWh</small>' : '',
+                        '</button>',
+                    ].join('')).join('');
+                }
+
+                function resetQuote(text) {
+                    $('#r-total').textContent = text || '–';
+                    $('#r-breakdown').innerHTML = '';
+                }
+
+                /** Kumpulkan input sewa; mengembalikan null bila belum lengkap. */
+                function rentPayload() {
+                    if (!rent.vehicle || !rent.garage) {
+                        return null;
+                    }
+
+                    const payload = {
+                        vehicle_id: rent.vehicle.id,
+                        garage_id: rent.garage.id,
+                        is_monthly: rent.isMonthly ? 1 : 0,
+                    };
+
+                    if (!rent.isMonthly) {
+                        const days = parseInt($('#r-days').value, 10);
+                        if (!(days >= 1)) {
+                            return null;
+                        }
+                        payload.days = days;
+                    }
+
+                    if (needsBattery()) {
+                        const raw = $('#r-battery').value.trim();
+                        if (raw === '') {
+                            return null;
+                        }
+                        payload.battery_level = parseInt(raw, 10);
+                    }
+
+                    return payload;
+                }
+
+                function scheduleQuote() {
+                    clearTimeout(rent.quoteTimer);
+                    rent.quoteTimer = setTimeout(updateQuote, 200);
+                }
+
+                /** Total biaya dihitung oleh server dan ditampilkan sebelum disimpan. */
+                async function updateQuote() {
+                    syncDates();
+                    const payload = rentPayload();
+                    if (!payload) {
+                        resetQuote(needsBattery() && rent.garage ? 'Isi sisa baterai untuk menghitung total.' : '–');
+                        return;
+                    }
+
+                    const seq = ++rent.quoteSeq;
+                    resetQuote('Menghitung…');
+
+                    try {
+                        const res = await api('/api/customer/rentals/quote', { method: 'POST', body: JSON.stringify(payload) });
+                        if (seq !== rent.quoteSeq) {
                             return;
                         }
-
-                        data.data.forEach((type) => {
-                            const charge = type.charge_price_kwh === null ? '—' : rp(type.charge_price_kwh) + ' /kWh';
-
-                            body.insertAdjacentHTML('beforeend', [
-                                '<tr>',
-                                '<td><strong>' + esc(type.id) + '</strong> · ' + esc(type.label) + '</td>',
-                                '<td>' + rp(type.rent_price) + '</td>',
-                                '<td>' + charge + '</td>',
-                                '</tr>',
-                            ].join(''));
-                        });
+                        const q = res.data;
+                        $('#r-end').value = q.end_date;
+                        $('#r-total').textContent = rp(q.total);
+                        const lines = [
+                            q.is_monthly
+                                ? 'Sewa bulanan (' + q.days + ' hari): 25 × ' + rp(q.daily_price) + ' = ' + rp(q.rent_price)
+                                : 'Sewa harian: ' + q.days + ' hari × ' + rp(q.daily_price) + ' = ' + rp(q.rent_price),
+                        ];
+                        if (q.battery_level !== null) {
+                            lines.push('Isi listrik hingga penuh: (' + rent.vehicle.battery_capacity + ' − ' + q.battery_level + ') kWh × ' + rp(rent.garage.charge_price_kwh) + ' = ' + rp(q.charge_price));
+                        }
+                        lines.push('Periode: ' + fmtDate(q.start_date) + ' – ' + fmtDate(q.end_date));
+                        $('#r-breakdown').innerHTML = lines.map((l) => '<li>' + esc(l) + '</li>').join('');
                     } catch (e) {
-                        body.innerHTML = '';
-                        body.insertAdjacentHTML('beforeend', '<tr class="empty-row"><td colspan="3">' + esc(e.message) + '</td></tr>');
+                        if (seq === rent.quoteSeq) {
+                            resetQuote(e.message);
+                        }
                     }
+                }
+
+                async function submitRent(event) {
+                    event.preventDefault();
+                    $('#rent-msg').hidden = true;
+
+                    const payload = rentPayload();
+                    const file = $('#r-proof').files[0];
+
+                    if (!rent.vehicle) { rentMsg('Pilih kendaraan terlebih dahulu.'); return; }
+                    if (!rent.garage) { rentMsg('Pilih garasi yang tersedia.'); return; }
+                    if (!payload) { rentMsg(needsBattery() ? 'Isi sisa baterai (kWh).' : 'Isi jumlah hari sewa.'); return; }
+                    if (!file) { rentMsg('Bukti pelunasan biaya wajib diunggah.'); return; }
+                    if (file.size > 5 * 1024 * 1024) { rentMsg('Ukuran bukti pelunasan maksimal 5 MB.'); return; }
+
+                    const form = new FormData();
+                    Object.entries(payload).forEach(([key, value]) => form.append(key, String(value)));
+                    form.append('transaction_proof', file);
+
+                    const btn = $('#r-submit');
+                    btn.disabled = true;
+                    btn.textContent = 'Menyimpan…';
+
+                    try {
+                        const res = await api('/api/customer/rentals', { method: 'POST', body: form });
+                        closeRent();
+                        flash($('#global-msg'), res.message, 'ok');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        await loadRentals();
+                    } catch (e) {
+                        rentMsg(e.message);
+                        loadAvailable(); // garasi mungkin baru saja diambil penyewa lain
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Simpan sewa';
+                    }
+                }
+
+                function wireRent() {
+                    $('#new-rent-btn').addEventListener('click', openRent);
+                    $('#rent-cancel').addEventListener('click', (event) => { event.preventDefault(); closeRent(); });
+                    $('#go-vehicles').addEventListener('click', (event) => {
+                        event.preventDefault();
+                        showTab('kendaraan');
+                        history.pushState({ tab: 'kendaraan' }, '', '?tab=kendaraan');
+                    });
+
+                    $('#r-vehicle').addEventListener('change', (event) => {
+                        rent.vehicle = vehicles.find((v) => String(v.id) === event.target.value) || null;
+                        $('#r-type').innerHTML = '';
+                        $('#r-battery').value = '';
+                        loadAvailable();
+                    });
+
+                    $('#r-type').addEventListener('change', loadAvailable);
+
+                    document.querySelectorAll('#rent-form .seg button').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('#rent-form .seg button').forEach((b) => b.classList.toggle('active', b === btn));
+                            rent.isMonthly = btn.dataset.monthly === '1';
+                            scheduleQuote();
+                        });
+                    });
+
+                    $('#r-days').addEventListener('input', scheduleQuote);
+                    $('#r-battery').addEventListener('input', scheduleQuote);
+
+                    $('#r-garages').addEventListener('click', (event) => {
+                        const card = event.target.closest('.garage-card');
+                        if (!card) {
+                            return;
+                        }
+                        rent.garage = rent.garages.find((g) => g.id === card.dataset.id) || null;
+                        document.querySelectorAll('.garage-card').forEach((c) => c.classList.toggle('selected', c === card));
+                        syncBatteryStep();
+                        scheduleQuote();
+                    });
+
+                    $('#rent-form').addEventListener('submit', submitRent);
+                    resetRent();
                 }
 
                 /* ===== List kendaraan ===== */
@@ -238,6 +653,7 @@
                         vehicles = data.data || [];
                         $('#veh-empty-note').hidden = vehicles.length !== 0;
                         renderVehicles();
+                        fillVehicleSelect();
                     } catch (e) {
                         body.innerHTML = '';
                         body.insertAdjacentHTML('beforeend', '<tr class="empty-row"><td colspan="5">' + esc(e.message) + '</td></tr>');
@@ -438,7 +854,8 @@
                     $('#who-name').textContent = me.email || '';
 
                     showTab(currentTab());
-                    loadGarages();
+                    wireRent();
+                    loadRentals();
                     loadVehicles();
                 }
 

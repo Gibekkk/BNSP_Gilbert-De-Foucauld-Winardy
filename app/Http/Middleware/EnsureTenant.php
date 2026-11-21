@@ -6,10 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware: hanya penyewa (bukan admin) yang boleh lewat.
+ */
 class EnsureTenant
 {
     /**
-     * Allow requests only for tenant accounts (not admin) with a customer profile.
+     * Hanya izinkan akun penyewa (bukan admin) yang memiliki profil pelanggan.
      */
     public function handle(Request $request, Closure $next): Response
     {

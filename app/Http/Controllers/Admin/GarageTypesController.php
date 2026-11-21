@@ -8,18 +8,13 @@ use App\Services\GarageService;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Admin overview of the garage types: issued count and remaining capacity.
+ * Ringkasan tipe garasi untuk admin: jumlah terbit dan sisa kapasitas.
  */
 class GarageTypesController extends Controller
 {
-    private const LABELS = [
-        'S' => 'Sepeda',
-        'C' => 'Mobil',
-        'E' => 'Mobil Listrik',
-    ];
 
     /**
-     * List S, C and E with their issued count and remaining capacity.
+     * Daftar tipe S, C, dan E beserta jumlah terbit dan sisa kapasitasnya.
      */
     public function index(): JsonResponse
     {
@@ -28,7 +23,7 @@ class GarageTypesController extends Controller
 
             return [
                 'key' => $type->id,
-                'label' => self::LABELS[$type->id] ?? 'Tipe '.$type->id,
+                'label' => GarageType::labelFor($type->id),
                 'count' => $count,
                 'remaining_capacity' => max(0, GarageService::MAX_PER_TYPE - $count),
             ];

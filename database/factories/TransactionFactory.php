@@ -31,7 +31,7 @@ class TransactionFactory extends Factory
     }
 
     /**
-     * Indicate a monthly rental ending one month out.
+     * State sewa bulanan (satu bulan sepanjang jumlah hari bulan mulai).
      */
     public function monthly(): static
     {

@@ -11,12 +11,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Tenant endpoints to read, add, and edit their own vehicles.
+ * Endpoint penyewa untuk melihat, menambah, dan mengubah kendaraan miliknya.
  */
 class VehiclesController extends Controller
 {
     /**
-     * List the tenant's vehicles plus their profile header info.
+     * Daftar kendaraan penyewa beserta info profil untuk header.
      */
     public function index(Request $request): JsonResponse
     {
@@ -35,7 +35,7 @@ class VehiclesController extends Controller
     }
 
     /**
-     * Add a new vehicle to the tenant's profile.
+     * Tambah kendaraan baru ke profil penyewa.
      */
     public function store(StoreVehicleRequest $request): JsonResponse
     {
@@ -54,7 +54,7 @@ class VehiclesController extends Controller
     }
 
     /**
-     * Edit one of the tenant's own vehicles (404 for other tenants' rows).
+     * Ubah kendaraan milik penyewa sendiri (404 untuk kendaraan penyewa lain).
      */
     public function update(StoreVehicleRequest $request, int $id): JsonResponse
     {
@@ -74,7 +74,7 @@ class VehiclesController extends Controller
     }
 
     /**
-     * Query scope restricted to the caller's customer profile.
+     * Query yang dibatasi pada profil pelanggan pemanggil.
      */
     private function ownVehicles(UserModel $user): Builder
     {
@@ -84,7 +84,7 @@ class VehiclesController extends Controller
     }
 
     /**
-     * Apply per-type rules: sepeda has no plate; battery kWh only on mobil_listrik.
+     * Terapkan aturan per tipe: sepeda tanpa plat; kapasitas baterai hanya untuk mobil_listrik.
      */
     private function normalize(array $attributes): array
     {
@@ -100,7 +100,7 @@ class VehiclesController extends Controller
     }
 
     /**
-     * Shape one vehicle row for JSON responses.
+     * Bentuk JSON satu baris kendaraan.
      */
     private function shape(Vehicle $vehicle): array
     {

@@ -15,8 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Satu transaksi sewa garasi.
  *
  * Nominal uang disimpan dalam rupiah (integer):
- *  - rent_price_total   : biaya sewa awal (harian x hari, atau 25 x harian untuk bulanan)
- *  - charge_price_total : biaya isi listrik hingga penuh (0 bila tidak berlaku)
+ *  - rent_price_total   : total biaya sewa baru = sewa (harian x hari, atau 25 x harian
+ *                         untuk bulanan) + biaya isi listrik (akumulatif)
+ *  - charge_price_total : bagian biaya isi listrik di dalam rent_price_total (0 bila tidak berlaku)
  * Biaya perpanjangan disimpan terpisah di transaction_extensions; end_date
  * selalu berisi tanggal selesai terkini (sudah termasuk perpanjangan).
  *
@@ -29,16 +30,25 @@ class Transaction extends Model
     /** @use HasFactory<TransactionFactory> */
     use HasFactory;
 
+    /**
+     * Garasi yang disewa pada transaksi ini.
+     */
     public function garage(): BelongsTo
     {
         return $this->belongsTo(Garage::class, 'garage_id');
     }
 
+    /**
+     * Kendaraan yang diparkir pada transaksi ini.
+     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
     }
 
+    /**
+     * Riwayat perpanjangan sewa oleh admin.
+     */
     public function extensions(): HasMany
     {
         return $this->hasMany(TransactionExtension::class);
@@ -65,7 +75,7 @@ class Transaction extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
+     * Konversi tipe (cast) atribut model.
      *
      * @return array<string, string>
      */

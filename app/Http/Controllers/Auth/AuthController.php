@@ -15,11 +15,14 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth as JWT;
 
+/**
+ * Autentikasi JWT: daftar, login, profil, logout, dan refresh token.
+ */
 class AuthController extends Controller
 {
     /**
-     * Register a new customer: create the Customer (pending) and its login account.
-     * Email/NIK uniqueness is enforced here so declined accounts can re-register.
+     * Daftarkan pelanggan baru: buat Customer (pending) beserta akun login-nya.
+     * Keunikan email/NIK dicek di sini agar akun yang ditolak dapat mendaftar ulang.
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -68,9 +71,9 @@ class AuthController extends Controller
     }
 
     /**
-     * Authenticate with email + password and issue a JWT token.
-     * The newest non-declined account for the email wins; admins always pass;
-     * tenants only when their customer status is "accepted".
+     * Login dengan email + password lalu terbitkan token JWT.
+     * Akun terbaru yang tidak ditolak untuk email tersebut dipakai; admin selalu lolos;
+     * penyewa hanya bila status pelanggannya "accepted".
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -125,7 +128,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Return the currently authenticated user from the Bearer token.
+     * Kembalikan user yang sedang login berdasarkan token Bearer.
      */
     public function me(Request $request): JsonResponse
     {
@@ -147,8 +150,8 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout: invalidate the current JWT so it can no longer be used.
-     * A missing or already-invalid token still returns the same success.
+     * Logout: batalkan JWT saat ini agar tidak dapat dipakai lagi.
+     * Token yang kosong atau sudah tidak valid tetap mengembalikan respons sukses.
      */
     public function logout(Request $request): JsonResponse
     {
@@ -157,18 +160,18 @@ class AuthController extends Controller
                 JWT::setToken($request->bearerToken())->invalidate();
             }
         } catch (\Throwable) {
-            // The token was missing or already invalid — nothing to invalidate.
+            // Token kosong atau sudah tidak valid — tidak ada yang perlu dibatalkan.
         }
 
         return response()->json(['message' => 'Anda telah keluar.']);
     }
 
     /**
-     * Exchange an expired (but still refreshable) JWT for a new one.
+     * Tukar JWT yang kedaluwarsa (tetapi masih dalam masa refresh) dengan yang baru.
      *
-     * This route is intentionally outside the auth:api middleware, because the
-     * middleware rejects expired tokens — which is exactly when the browser
-     * needs to call it. The old token is blacklisted by the refresh.
+     * Route ini sengaja di luar middleware auth:api, karena middleware tersebut
+     * menolak token kedaluwarsa — padahal justru saat itulah browser
+     * perlu memanggilnya. Token lama otomatis masuk blacklist saat refresh.
      */
     public function refresh(): JsonResponse
     {
@@ -181,7 +184,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Sesi berakhir, silakan masuk kembali.'], 401);
         }
 
-        // A tenant who was declined (or never accepted) must not keep a session alive.
+        // Penyewa yang ditolak (atau belum disetujui) tidak boleh mempertahankan sesi.
         if ($user === null || (! $user->is_admin && $user->customer?->status !== Customer::STATUS_ACCEPTED)) {
             return response()->json(['message' => 'Akun tidak lagi memiliki akses.'], 401);
         }
@@ -194,7 +197,7 @@ class AuthController extends Controller
     }
 
     /**
-     * True when a non-declined account (or an admin) already uses this email.
+     * True bila email sudah dipakai akun yang tidak ditolak (atau oleh admin).
      */
     private function hasActiveAccountForEmail(string $email): bool
     {
@@ -208,7 +211,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Declined accounts are terminal and can never log in again.
+     * Akun yang ditolak bersifat final dan tidak dapat login lagi.
      */
     private function isDeclinedAccount(User $user): bool
     {
@@ -216,7 +219,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Keep NIK somewhat private (all but last 2 digits masked).
+     * Samarkan NIK (semua kecuali 2 digit terakhir).
      */
     private function maskNik(string $nik): string
     {

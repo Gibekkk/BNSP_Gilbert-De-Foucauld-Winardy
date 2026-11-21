@@ -5,14 +5,22 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Validasi pembuatan garasi baru oleh admin (tarif kWh wajib untuk tipe E).
+ */
 class StoreGarageRequest extends FormRequest
 {
+    /**
+     * Hak akses sudah dijaga oleh middleware route.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -30,6 +38,8 @@ class StoreGarageRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

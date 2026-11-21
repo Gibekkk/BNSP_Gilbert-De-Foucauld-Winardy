@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RentalsController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Tenant\GaragesController as TenantGaragesController;
+use App\Http\Controllers\Tenant\RentalsController as TenantRentalsController;
 use App\Http\Controllers\Tenant\VehiclesController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,9 +50,14 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
 });
 
 Route::middleware(['auth:api', 'tenant'])->group(function () {
-    // Portal pelanggan: kelola kendaraan + template garasi (stub).
+    // Portal pelanggan: kelola kendaraan.
     Route::get('/customer/vehicles', [VehiclesController::class, 'index']);
     Route::post('/customer/vehicles', [VehiclesController::class, 'store']);
     Route::patch('/customer/vehicles/{id}', [VehiclesController::class, 'update']);
-    Route::get('/customer/garage-preview', [TenantGaragesController::class, 'preview']);
+
+    // Sewa baru + sewaan saya (tab Garasi). Penyewa tidak dapat memperpanjang sewa.
+    Route::get('/customer/garages/available', [TenantGaragesController::class, 'available']);
+    Route::get('/customer/rentals', [TenantRentalsController::class, 'index']);
+    Route::post('/customer/rentals/quote', [TenantRentalsController::class, 'quote']);
+    Route::post('/customer/rentals', [TenantRentalsController::class, 'store']);
 });

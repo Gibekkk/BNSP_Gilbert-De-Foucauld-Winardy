@@ -9,22 +9,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Business rules for issuing and re-pricing garage slots.
+ * Aturan bisnis penerbitan garasi baru dan perubahan harganya.
  *
- * A type may issue at most 999 garages, ever: the sequence (garage_types.count)
- * only goes up and is never reused, even if slot rows are removed later. All
- * writes run inside a DB transaction with the type row locked for update so
- * concurrent creates cannot collide or exceed the cap.
+ * Setiap tipe maksimal menerbitkan 999 garasi selamanya: urutan (garage_types.count)
+ * hanya naik dan tidak pernah dipakai ulang, walaupun baris garasi dihapus. Semua
+ * penulisan berjalan dalam transaksi DB dengan baris tipe dikunci (lock for update)
+ * sehingga pembuatan bersamaan tidak bentrok atau melewati batas.
  */
 class GarageService
 {
     /**
-     * Maximum number of garages ever issuable per type (S001..S999, etc).
+     * Jumlah maksimum garasi yang dapat diterbitkan per tipe (S001..S999, dst).
      */
     public const MAX_PER_TYPE = 999;
 
     /**
-     * Garages still available to be issued for a type.
+     * Sisa garasi yang masih dapat diterbitkan untuk satu tipe.
      */
     public function remainingCapacity(string $typeId): int
     {
@@ -34,7 +34,7 @@ class GarageService
     }
 
     /**
-     * Issue exactly one new garage slot for the given type.
+     * Terbitkan tepat satu garasi baru untuk tipe tertentu.
      */
     public function createOne(string $typeId, int $rentPrice, ?int $chargePriceKwh): Garage
     {
@@ -44,7 +44,7 @@ class GarageService
     }
 
     /**
-     * Issue several new garage slots for the given type (all-or-nothing).
+     * Terbitkan beberapa garasi baru sekaligus untuk tipe tertentu (semua atau tidak sama sekali).
      *
      * @return Collection<int, Garage>
      */
@@ -56,7 +56,7 @@ class GarageService
     }
 
     /**
-     * Change only the price fields of an existing garage.
+     * Ubah hanya kolom harga dari garasi yang sudah ada.
      */
     public function update(Garage $garage, int $rentPrice, ?int $chargePriceKwh): Garage
     {
@@ -64,8 +64,8 @@ class GarageService
             /** @var Garage $fresh */
             $fresh = Garage::query()->whereKey($garage->getKey())->lockForUpdate()->firstOrFail();
 
-            // Types S and C never carry a kWh rate; type E keeps its stored
-            // rate when the caller omits one.
+            // Tipe S dan C tidak pernah memiliki tarif kWh; tipe E mempertahankan
+            // tarif tersimpan bila tidak diisi.
             $charge = null;
 
             if ($fresh->garage_type_id === 'E') {
@@ -82,12 +82,12 @@ class GarageService
     }
 
     /**
-     * Sync garages.is_used with today's rentals.
+     * Sinkronkan garages.is_used dengan sewa yang berjalan hari ini.
      *
-     * A garage is "used" exactly while it has a transaction with
-     * start_date <= today <= end_date. Without this, a garage would stay
-     * "used" forever after its rental ended. Runs daily via the scheduler
-     * (routes/console.php) and before admin screens that show garage status.
+     * Garasi berstatus "used" selama memiliki transaksi dengan
+     * start_date <= hari ini <= end_date. Tanpa ini garasi akan tetap
+     * "used" selamanya setelah sewanya selesai. Dijalankan harian lewat scheduler
+     * (routes/console.php) dan sebelum layar yang menampilkan status garasi.
      *
      * @return array{released: int, occupied: int}
      */
@@ -113,7 +113,7 @@ class GarageService
     }
 
     /**
-     * Issue $quantity slots under the locked sequence of one type.
+     * Terbitkan $quantity garasi memakai urutan tipe yang sedang dikunci.
      *
      * @return Collection<int, Garage>
      */
@@ -140,7 +140,7 @@ class GarageService
             ]);
         }
 
-        // Types S and C are forced to a null kWh rate regardless of input.
+        // Tipe S dan C selalu tanpa tarif kWh, apa pun inputnya.
         if ($typeId !== 'E') {
             $chargePriceKwh = null;
         }
@@ -162,12 +162,12 @@ class GarageService
             ];
         }
 
-        // insert() bypasses mass assignment on purpose (explicit row shape).
+        // insert() sengaja melewati mass assignment (bentuk baris ditulis eksplisit).
         foreach (array_chunk($rows, 500) as $chunk) {
             Garage::insert($chunk);
         }
 
-        // The sequence advances by exactly the amount issued, in the same transaction.
+        // Urutan bertambah tepat sejumlah garasi yang diterbitkan, dalam transaksi yang sama.
         $type->forceFill(['count' => $base + $quantity])->save();
 
         return Garage::query()

@@ -7,6 +7,7 @@ use App\Http\Requests\BulkStoreGarageRequest;
 use App\Http\Requests\StoreGarageRequest;
 use App\Http\Requests\UpdateGarageRequest;
 use App\Models\Garage;
+use App\Models\GarageType;
 use App\Services\GarageService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -14,21 +15,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Admin garage management: list slots, issue new ones (single or bulk), and
- * re-price an existing slot. All state changes go through GarageService.
+ * Kelola garasi oleh admin: daftar garasi, terbitkan garasi baru (satu atau massal),
+ * dan ubah harga garasi. Semua perubahan data melalui GarageService.
  */
 class GaragesController extends Controller
 {
-    private const LABELS = [
-        'S' => 'Sepeda',
-        'C' => 'Mobil',
-        'E' => 'Mobil Listrik',
-    ];
 
     private const PER_PAGE = 25;
 
     /**
-     * Paginated garage list (25 per page, ordered by id), optionally filtered by type.
+     * Daftar garasi berhalaman (25 per halaman, urut kode), opsional difilter per tipe.
      */
     public function index(Request $request, GarageService $service): JsonResponse
     {
@@ -61,7 +57,7 @@ class GaragesController extends Controller
     }
 
     /**
-     * Create a single garage slot.
+     * Buat satu garasi.
      */
     public function store(StoreGarageRequest $request, GarageService $service): JsonResponse
     {
@@ -78,7 +74,7 @@ class GaragesController extends Controller
     }
 
     /**
-     * Create several garage slots in one all-or-nothing operation.
+     * Buat beberapa garasi sekaligus (semua atau tidak sama sekali).
      */
     public function bulk(BulkStoreGarageRequest $request, GarageService $service): JsonResponse
     {
@@ -108,7 +104,7 @@ class GaragesController extends Controller
     }
 
     /**
-     * Re-price one garage (rent_price and/or charge_price_kwh only).
+     * Ubah harga satu garasi (hanya rent_price dan/atau charge_price_kwh).
      */
     public function update(UpdateGarageRequest $request, Garage $garage, GarageService $service): JsonResponse
     {
@@ -125,14 +121,14 @@ class GaragesController extends Controller
     }
 
     /**
-     * Public JSON shape of one garage row.
+     * Bentuk JSON satu baris garasi.
      */
     private function shape(Garage $garage): array
     {
         return [
             'id' => $garage->id,
             'type' => $garage->garage_type_id,
-            'label' => self::LABELS[$garage->garage_type_id] ?? 'Tipe '.$garage->garage_type_id,
+            'label' => GarageType::labelFor($garage->garage_type_id),
             'rent_price' => (int) $garage->rent_price,
             'charge_price_kwh' => $garage->charge_price_kwh === null ? null : (int) $garage->charge_price_kwh,
             'is_used' => (bool) $garage->is_used,

@@ -13,28 +13,38 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * Perpanjangan sewa garasi oleh admin.
+ * Perpanjangan sewa oleh admin ("Perpanjang Status Garasi").
  *
  * Aturan:
- *  - Hanya sewa yang sedang berjalan hari ini yang dapat diperpanjang.
- *  - Tanggal selesai hanya boleh dimundurkan (tidak bisa memperpendek sewa).
- *  - Sisa biaya dihitung oleh RentalPricing::extensionBreakdown() memakai
- *    harga harian garasi saat ini.
- *  - Bukti bayar wajib diunggah; riwayat disimpan di transaction_extensions
- *    dan transactions.end_date diperbarui ke tanggal selesai yang baru.
+ * - Hanya sewa yang sedang berjalan hari ini yang dapat diperpanjang.
+ * - Hanya tanggal selesai yang berubah (bukan garasi, kendaraan, atau tipe garasi),
+ * dan hanya boleh mundur — sewa tidak dapat diperpendek. Tidak ada batas maksimum.
+ * - Hari perpanjangan tidak boleh bertabrakan dengan transaksi lain pada
+ * garasi (atau kendaraan) yang sama, sehingga garasi tetap terkunci selama
+ * seluruh masa perpanjangan.
+ * - Sisa biaya dihitung RentalService::extensionBreakdown() (blok bulan
+ * seharga 25 x harian, sisa hari dengan harga harian).
+ * - Admin mengunggah bukti bayar; riwayat disimpan di
+ * transaction_extensions dan transactions.end_date dimundurkan.
  */
 class RentalExtensionService
 {
+    /** Folder (disk public) untuk bukti bayar perpanjangan dari admin. */
     public const PROOF_DIRECTORY = 'proofs/extensions';
 
-    public function __construct(private readonly RentalPricing $pricing)
+    /**
+     * Suntikkan aturan sewa bersama (RentalService).
+     */
+    public function __construct(private readonly RentalService $rentals)
     {
     }
 
     /**
-     * Hitung sisa biaya tanpa menyimpan apa pun (untuk pratinjau di layar admin).
+     * Hitung sisa biaya tanpa menyimpan (pratinjau di layar admin).
      *
      * @return array{current_end_date: string, new_end_date: string, daily_price: int, days: int, total: int, segments: list<array<string, mixed>>}
+     *
+     * @throws ValidationException on any broken rule
      */
     public function quote(Transaction $transaction, string $newEndDate): array
     {
@@ -42,10 +52,15 @@ class RentalExtensionService
 
         $transaction->loadMissing('garage');
         $currentEnd = CarbonImmutable::parse($transaction->end_date);
-        $newEnd = $this->parseNewEnd($newEndDate, $currentEnd);
+        $newEnd = $this->parseDate($newEndDate);
         $dailyPrice = (int) $transaction->garage->rent_price;
 
-        $breakdown = $this->pricing->extensionBreakdown($dailyPrice, $currentEnd, $newEnd);
+        $breakdown = $this->rentals->extensionBreakdown($dailyPrice, $currentEnd, $newEnd);
+
+        // Garasi (dan kendaraan) harus kosong pada setiap hari perpanjangan.
+        $from = $currentEnd->addDay();
+        $this->rentals->assertGarageFree($transaction->garage_id, $from, $newEnd, $transaction->id);
+        $this->rentals->assertVehicleFree((int) $transaction->vehicle_id, $from, $newEnd, $transaction->id);
 
         return [
             'current_end_date' => $currentEnd->toDateString(),
@@ -58,7 +73,9 @@ class RentalExtensionService
     }
 
     /**
-     * Simpan perpanjangan beserta bukti bayarnya (all-or-nothing).
+     * Simpan perpanjangan beserta bukti bayarnya (semua atau tidak sama sekali).
+     *
+     * @throws ValidationException on any broken rule
      */
     public function extend(Transaction $transaction, string $newEndDate, UploadedFile $proof): TransactionExtension
     {
@@ -68,6 +85,9 @@ class RentalExtensionService
             return DB::transaction(function () use ($transaction, $newEndDate, $path): TransactionExtension {
                 /** @var Transaction $locked */
                 $locked = Transaction::query()->with('garage')->lockForUpdate()->findOrFail($transaction->getKey());
+
+                // Kunci juga baris garasi agar tidak ada sewa baru yang menyelip.
+                $locked->garage()->lockForUpdate()->first();
 
                 // Hitung ulang di dalam lock agar tidak memakai end_date yang basi.
                 $quote = $this->quote($locked, $newEndDate);
@@ -94,6 +114,8 @@ class RentalExtensionService
 
     /**
      * Tolak transaksi yang tidak sedang berjalan hari ini.
+     *
+     * @throws ValidationException
      */
     private function assertActive(Transaction $transaction): void
     {
@@ -107,26 +129,22 @@ class RentalExtensionService
     }
 
     /**
-     * Validasi tanggal selesai baru: format Y-m-d dan harus setelah tanggal selesai saat ini.
+     * Baca tanggal dengan format ketat Y-m-d.
+     *
+     * @throws ValidationException when the format is invalid
      */
-    private function parseNewEnd(string $value, CarbonImmutable $currentEnd): CarbonImmutable
+    private function parseDate(string $value): CarbonImmutable
     {
         try {
-            $newEnd = CarbonImmutable::createFromFormat('!Y-m-d', $value);
+            $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
         } catch (InvalidArgumentException) {
-            $newEnd = false;
+            $date = false;
         }
 
-        if ($newEnd === false || $newEnd->toDateString() !== $value) {
+        if ($date === false || $date->toDateString() !== $value) {
             throw ValidationException::withMessages(['new_end_date' => 'Format tanggal tidak valid (YYYY-MM-DD).']);
         }
 
-        if ($newEnd->lessThanOrEqualTo($currentEnd)) {
-            throw ValidationException::withMessages([
-                'new_end_date' => 'Tanggal selesai baru harus setelah '.$currentEnd->translatedFormat('d M Y').'. Sewa tidak dapat diperpendek.',
-            ]);
-        }
-
-        return $newEnd;
+        return $date;
     }
 }

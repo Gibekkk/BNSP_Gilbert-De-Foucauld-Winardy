@@ -4,14 +4,22 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validasi pendaftaran penyewa: NIK, nama lengkap, telepon, email, password.
+ */
 class RegisterRequest extends FormRequest
 {
+    /**
+     * Endpoint publik, semua orang boleh mengirim.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -26,6 +34,8 @@ class RegisterRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

@@ -5,14 +5,22 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Validasi tambah/ubah kendaraan penyewa (plat wajib kecuali sepeda; baterai hanya mobil listrik).
+ */
 class StoreVehicleRequest extends FormRequest
 {
+    /**
+     * Hak akses sudah dijaga oleh middleware route.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -31,6 +39,8 @@ class StoreVehicleRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

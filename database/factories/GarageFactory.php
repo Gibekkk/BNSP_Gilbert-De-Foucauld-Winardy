@@ -16,8 +16,8 @@ class GarageFactory extends Factory
     protected static int $sequence = 0;
 
     /**
-     * Pricing lives on the garage itself: random integer rupiah in multiples of
-     * 1000 per day; the kWh rate only exists for type E.
+     * Harga disimpan di setiap garasi: rupiah bulat acak kelipatan
+     * 1000 per hari; tarif per kWh hanya ada untuk tipe E.
      */
     public function definition(): array
     {
@@ -35,7 +35,7 @@ class GarageFactory extends Factory
     }
 
     /**
-     * Indicate that the garage is currently being used.
+     * State garasi yang sedang dipakai (used).
      */
     public function used(): static
     {

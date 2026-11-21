@@ -8,12 +8,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Admin endpoints to review, approve, and decline tenant registrations.
+ * Endpoint admin untuk meninjau, menyetujui, dan menolak pendaftaran penyewa.
  */
 class CustomerController extends Controller
 {
     /**
-     * List all customer registrations (newest first) with their account email.
+     * Daftar semua pendaftaran pelanggan (terbaru dulu) beserta email akunnya.
      */
     public function index(Request $request): JsonResponse
     {
@@ -45,7 +45,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Approve a pending registration so the tenant can log in.
+     * Setujui pendaftaran pending agar penyewa dapat login.
      */
     public function approve(int $id): JsonResponse
     {
@@ -67,7 +67,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Decline a pending registration (terminal — no re-approval).
+     * Tolak pendaftaran pending (final — tidak dapat disetujui kembali).
      */
     public function decline(int $id): JsonResponse
     {
@@ -89,7 +89,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Resolve a customer by id or abort with a JSON 404.
+     * Cari pelanggan berdasarkan id atau hentikan dengan JSON 404.
      */
     private function findOr404(int $id): Customer
     {

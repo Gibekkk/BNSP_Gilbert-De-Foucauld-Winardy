@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class CustomerFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * Nilai bawaan model.
      */
     public function definition(): array
     {
@@ -25,7 +25,7 @@ class CustomerFactory extends Factory
     }
 
     /**
-     * Indicate that the customer has been accepted by the admin.
+     * State pelanggan yang sudah disetujui admin.
      */
     public function accepted(): static
     {
@@ -33,7 +33,7 @@ class CustomerFactory extends Factory
     }
 
     /**
-     * Indicate that the customer's NIK was declined by the admin.
+     * State pelanggan yang NIK-nya ditolak admin.
      */
     public function declined(): static
     {

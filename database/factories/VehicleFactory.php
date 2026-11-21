@@ -19,7 +19,7 @@ class VehicleFactory extends Factory
     ];
 
     /**
-     * Define the model's default state (a sepeda motor).
+     * Nilai bawaan model (sebuah sepeda motor).
      */
     public function definition(): array
     {
@@ -27,8 +27,8 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * Build attributes that stay valid for one vehicle type
-     * (plate rules and battery capacity).
+     * Susun atribut yang tetap valid untuk satu tipe kendaraan
+     * (aturan plat dan kapasitas baterai).
      */
     private function forType(string $type): array
     {
@@ -49,7 +49,7 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * Indicate a sepeda: no plate and no battery.
+     * State sepeda: tanpa plat dan tanpa baterai.
      */
     public function sepeda(): static
     {
@@ -57,7 +57,7 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * Indicate a sepeda motor.
+     * State sepeda motor.
      */
     public function sepedaMotor(): static
     {
@@ -65,7 +65,7 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * Indicate a mobil (combustion): plate present, no battery.
+     * State mobil (bensin): memakai plat, tanpa baterai.
      */
     public function mobil(): static
     {
@@ -73,7 +73,7 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * Indicate a mobil listrik: plate plus integer kWh battery capacity.
+     * State mobil listrik: memakai plat dan kapasitas baterai (kWh, bilangan bulat).
      */
     public function mobilListrik(): static
     {

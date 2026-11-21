@@ -48,7 +48,7 @@
                 <div class="field">
                     <label for="c-type">Tipe</label>
                     <select id="c-type" name="garage_type_id">
-                        <option value="S">Sepeda (S)</option>
+                        <option value="S">Sepeda / Motor (S)</option>
                         <option value="C">Mobil (C)</option>
                         <option value="E">Mobil Listrik (E)</option>
                     </select>
@@ -104,7 +104,7 @@
             <label class="muted">Filter:
                 <select id="l-type" style="padding:4px 8px;border-radius:8px;border:1px solid var(--border)">
                     <option value="">Semua</option>
-                    <option value="S">Sepeda</option>
+                    <option value="S">Sepeda / Motor</option>
                     <option value="C">Mobil</option>
                     <option value="E">Mobil Listrik</option>
                 </select>

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Satu garasi (kode S001/C001/E001) beserta harga sewa harian dan tarif kWh-nya.
+ */
 #[Fillable(['id', 'garage_type_id', 'is_used', 'rent_price', 'charge_price_kwh'])]
 class Garage extends Model
 {
@@ -20,11 +23,17 @@ class Garage extends Model
 
     protected $keyType = 'string';
 
+    /**
+     * Tipe garasi ini (S, C, atau E).
+     */
     public function garageType(): BelongsTo
     {
         return $this->belongsTo(GarageType::class, 'garage_type_id');
     }
 
+    /**
+     * Semua transaksi sewa pada garasi ini.
+     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
@@ -53,7 +62,7 @@ class Garage extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
+     * Konversi tipe (cast) atribut model.
      *
      * @return array<string, string>
      */

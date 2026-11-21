@@ -7,12 +7,15 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Seeder utama: akun admin, pelanggan contoh, dan data demo sewa.
+ */
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
     /**
-     * Seed the application's database.
+     * Isi basis data aplikasi: akun admin, pelanggan contoh, dan data demo sewa.
      */
     public function run(): void
     {

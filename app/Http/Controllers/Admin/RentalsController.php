@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExtendRentalRequest;
+use App\Models\GarageType;
 use App\Models\Transaction;
 use App\Models\TransactionExtension;
 use App\Services\GarageService;
@@ -19,11 +20,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class RentalsController extends Controller
 {
-    private const LABELS = [
-        'S' => 'Sepeda',
-        'C' => 'Mobil',
-        'E' => 'Mobil Listrik',
-    ];
 
     private const VEHICLE_LABELS = [
         'sepeda' => 'Sepeda',
@@ -104,7 +100,7 @@ class RentalsController extends Controller
             'id' => $t->id,
             'garage_id' => $t->garage_id,
             'garage_type' => $garage?->garage_type_id,
-            'garage_label' => self::LABELS[$garage?->garage_type_id] ?? '-',
+            'garage_label' => ($garage ? GarageType::labelFor($garage->garage_type_id) : '-'),
             'daily_price' => (int) $garage?->rent_price,
             'customer' => [
                 'id' => $customer?->id,

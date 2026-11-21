@@ -4,14 +4,22 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validasi login (satu endpoint untuk admin dan penyewa).
+ */
 class LoginRequest extends FormRequest
 {
+    /**
+     * Endpoint publik, semua orang boleh mengirim.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -23,6 +31,8 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Pesan validasi berbahasa Indonesia.
+     *
      * @return array<string, string>
      */
     public function messages(): array

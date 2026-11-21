@@ -172,7 +172,7 @@
         </script>
 
         <style>
-            /* small local additions for this module */
+            /* tambahan gaya lokal khusus halaman ini */
             .sep {
                 border: none;
                 border-top: 1px solid var(--border);

@@ -8,7 +8,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\GarageService;
-use App\Services\RentalPricing;
+use App\Services\RentalService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
@@ -19,9 +19,11 @@ use Illuminate\Support\Facades\Storage;
  * hari ini, sebagian pernah diperpanjang) agar laporan dan fitur perpanjang
  * sewa langsung terisi.
  *
- * Semua data mematuhi aturan bisnis: tipe kendaraan ↔ tipe garasi, sewa
- * harian maks. 30 hari, sewa bulanan berakhir di akhir bulan, satu garasi
- * tidak pernah disewa ganda pada tanggal yang sama. Hasil acak bersifat
+ * Semua data mematuhi aturan bisnis di RentalService: tipe kendaraan ↔ tipe
+ * garasi, sewa harian maks. (jumlah hari bulan mulai - 1), sewa bulanan
+ * sepanjang jumlah hari bulan mulai, biaya isi listrik diakumulasikan ke
+ * rent_price_total, serta satu garasi / satu kendaraan tidak pernah dipakai
+ * ganda pada tanggal yang sama. Hasil acak bersifat
  * deterministik (seed tetap) sehingga demo selalu sama.
  */
 class DemoRentalSeeder extends Seeder
@@ -31,7 +33,10 @@ class DemoRentalSeeder extends Seeder
     /** PNG 1x1 sebagai contoh bukti bayar. */
     private const PROOF_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
-    public function run(GarageService $garages, RentalPricing $pricing): void
+    /**
+     * Jalankan seeder data demo (dilewati bila garasi sudah ada).
+     */
+    public function run(GarageService $garages, RentalService $rentals): void
     {
         if (Garage::query()->exists()) {
             $this->command?->warn('Garasi sudah ada — DemoRentalSeeder dilewati.');
@@ -65,7 +70,7 @@ class DemoRentalSeeder extends Seeder
         //    sehingga satu kendaraan tidak pernah berada di dua garasi sekaligus.
         $today = CarbonImmutable::today();
 
-        Garage::query()->orderBy('id')->get()->each(function (Garage $garage, int $index) use ($customers, $pricing, $today): void {
+        Garage::query()->orderBy('id')->get()->each(function (Garage $garage, int $index) use ($customers, $rentals, $today): void {
             $owner = $customers[$index % $customers->count()];
             $vehicle = $this->vehicleFor($garage, $owner, $index);
 
@@ -78,15 +83,15 @@ class DemoRentalSeeder extends Seeder
                 }
 
                 $isMonthly = mt_rand(1, 100) <= 25;
-                $days = mt_rand(1, RentalPricing::MAX_DAILY_DAYS);
-                $end = $isMonthly ? $pricing->monthlyEndDate($start) : $pricing->dailyEndDate($start, $days);
+                $days = $isMonthly ? $rentals->monthlyLengthInDays($start) : mt_rand(1, $rentals->maxDailyDays($start));
+                $end = $rentals->endDate($start, $days);
                 $daily = (int) $garage->rent_price;
 
                 $charge = 0;
                 $level = null;
                 if ($garage->garage_type_id === 'E' && $vehicle->type === 'mobil_listrik') {
                     $level = mt_rand(5, max(5, (int) $vehicle->battery_capacity - 5));
-                    $charge = $pricing->chargeTotal((int) $vehicle->battery_capacity, $level, (int) $garage->charge_price_kwh);
+                    $charge = $rentals->chargePrice((int) $vehicle->battery_capacity, $level, (int) $garage->charge_price_kwh);
                 }
 
                 $transaction = Transaction::query()->create([
@@ -96,7 +101,8 @@ class DemoRentalSeeder extends Seeder
                     'end_date' => $end->toDateString(),
                     'is_monthly' => $isMonthly,
                     'battery_level' => $level,
-                    'rent_price_total' => $pricing->rentTotal($daily, $isMonthly, $days),
+                    // Biaya isi listrik diakumulasikan ke total sewa.
+                    'rent_price_total' => $rentals->rentPrice($daily, $isMonthly, $days) + $charge,
                     'charge_price_total' => $charge,
                     'transaction_proof' => self::PROOF_PATH,
                 ]);
@@ -104,7 +110,7 @@ class DemoRentalSeeder extends Seeder
                 // ±15% sewa pernah diperpanjang admin.
                 if (mt_rand(1, 100) <= 15) {
                     $newEnd = $end->addDays(mt_rand(1, 20));
-                    $quote = $pricing->extensionBreakdown($daily, $end, $newEnd);
+                    $quote = $rentals->extensionBreakdown($daily, $end, $newEnd);
 
                     $transaction->extensions()->create([
                         'extra_rent' => $quote['total'],

@@ -7,10 +7,13 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Seeder satu pelanggan contoh yang sudah disetujui beserta akun login-nya.
+ */
 class CustomerSeeder extends Seeder
 {
     /**
-     * Seed one demo customer (already accepted) with its login account.
+     * Buat satu pelanggan contoh (sudah disetujui) beserta akun login-nya.
      * Login: pelanggan@example.com / password
      */
     public function run(): void

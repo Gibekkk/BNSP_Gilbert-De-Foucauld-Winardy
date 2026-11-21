@@ -6,10 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware: hanya admin yang boleh lewat.
+ */
 class EnsureAdmin
 {
     /**
-     * Only allow requests from authenticated admin users.
+     * Hanya izinkan permintaan dari admin yang sudah login.
      */
     public function handle(Request $request, Closure $next): Response
     {

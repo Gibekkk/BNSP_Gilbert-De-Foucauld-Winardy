@@ -81,7 +81,7 @@
                 <div class="field">
                     <label for="x-proof">Bukti bayar (gambar)</label>
                     <input id="x-proof" name="transaction_proof" type="file" accept="image/png,image/jpeg,image/webp" required>
-                    <small class="hint">JPG / PNG / WEBP, maks. 2 MB.</small>
+                    <small class="hint">JPG / PNG / WEBP, maks. 5 MB.</small>
                 </div>
             </div>
 
@@ -191,7 +191,7 @@
             '<div><span>Penyewa</span>' + esc(row.customer.name) + ' (NIK ' + esc(row.customer.nik || '-') + ')</div>',
             '<div><span>Kendaraan</span>' + esc(row.vehicle.type_label) + ' ' + esc([row.vehicle.license_plate, row.vehicle.brand].filter(Boolean).join(' · ')) + '</div>',
             '<div><span>Harga sewa harian</span>' + rp(row.daily_price) + ' <span class="muted">(bulanan ' + rp(row.daily_price * 25) + ')</span></div>',
-            '<div><span>Biaya awal</span>' + rp(row.rent_price_total) + (row.charge_price_total ? ' + listrik ' + rp(row.charge_price_total) : '') +
+            '<div><span>Biaya awal</span>' + rp(row.rent_price_total) + (row.charge_price_total ? ' <span class="muted">(termasuk isi listrik ' + rp(row.charge_price_total) + ')</span>' : '') +
                 (row.transaction_proof_url ? ' · <a class="link" href="' + esc(row.transaction_proof_url) + '" target="_blank" rel="noopener">bukti</a>' : '') + '</div>',
         ].join('');
 
@@ -257,7 +257,7 @@
             const q = res.data;
             $('#x-total').textContent = rp(q.total) + ' · ' + q.days + ' hari';
             $('#x-segments').innerHTML = q.segments.map((s) => '<li>' + fmtDate(s.from) + ' – ' + fmtDate(s.to) + ': ' +
-                (s.monthly ? '1 bulan penuh (25 × ' + rp(q.daily_price) + ')' : s.days + ' hari × ' + rp(q.daily_price)) +
+                (s.monthly ? '1 bulan = ' + s.days + ' hari (25 × ' + rp(q.daily_price) + ')' : s.days + ' hari × ' + rp(q.daily_price)) +
                 ' = <strong>' + rp(s.amount) + '</strong></li>').join('');
         } catch (e) {
             if (seq === quoteSeq) {
@@ -288,8 +288,8 @@
             showMsg('Bukti bayar wajib diunggah.');
             return;
         }
-        if (file.size > 2 * 1024 * 1024) {
-            showMsg('Ukuran bukti bayar maksimal 2 MB.');
+        if (file.size > 5 * 1024 * 1024) {
+            showMsg('Ukuran bukti bayar maksimal 5 MB.');
             return;
         }
 

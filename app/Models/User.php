@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,6 +11,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * Akun login (admin atau penyewa) yang diautentikasi dengan JWT.
+ */
 #[Fillable(['email', 'password', 'is_admin', 'customer_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements JWTSubject
@@ -20,7 +22,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
+     * Konversi tipe (cast) atribut model.
      *
      * @return array<string, string>
      */
@@ -32,13 +34,16 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    /**
+     * Profil pelanggan milik akun ini (kosong untuk admin).
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
     /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
+     * Identitas user yang disimpan pada klaim subject (sub) JWT.
      */
     public function getJWTIdentifier()
     {
@@ -46,7 +51,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
+     * Klaim tambahan untuk JWT (tidak ada).
      */
     public function getJWTCustomClaims(): array
     {
