@@ -82,6 +82,37 @@ class GarageService
     }
 
     /**
+     * Sync garages.is_used with today's rentals.
+     *
+     * A garage is "used" exactly while it has a transaction with
+     * start_date <= today <= end_date. Without this, a garage would stay
+     * "used" forever after its rental ended. Runs daily via the scheduler
+     * (routes/console.php) and before admin screens that show garage status.
+     *
+     * @return array{released: int, occupied: int}
+     */
+    public function syncUsage(): array
+    {
+        $today = today()->toDateString();
+
+        $active = fn ($query) => $query
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today);
+
+        $released = Garage::query()
+            ->where('is_used', true)
+            ->whereDoesntHave('transactions', $active)
+            ->update(['is_used' => false]);
+
+        $occupied = Garage::query()
+            ->where('is_used', false)
+            ->whereHas('transactions', $active)
+            ->update(['is_used' => true]);
+
+        return ['released' => $released, 'occupied' => $occupied];
+    }
+
+    /**
      * Issue $quantity slots under the locked sequence of one type.
      *
      * @return Collection<int, Garage>

@@ -25,6 +25,8 @@
             <a href="{{ route('admin') }}" class="tab-btn active" aria-current="page">Dasbor</a>
             <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
             <a href="{{ route('admin.garages') }}" class="tab-btn">Kelola garasi</a>
+            <a href="{{ route('admin.rentals') }}" class="tab-btn">Perpanjang sewa</a>
+            <a href="{{ route('admin.reports') }}" class="tab-btn">Laporan</a>
         </nav>
 
         <main class="layout">
@@ -59,6 +61,14 @@
                     <div class="stat-value" id="st-garages">–/–</div>
                     <div class="stat-label">Garasi tersedia / total</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="st-active">–</div>
+                    <div class="stat-label">Sewa aktif hari ini</div>
+                </div>
+                <div class="stat-card accent-ok">
+                    <div class="stat-value" id="st-income">–</div>
+                    <div class="stat-label">Pendapatan bulan ini</div>
+                </div>
             </section>
 
             <!-- ===== Registrasi terbaru ===== -->
@@ -84,6 +94,7 @@
             </section>
         </main>
 
+        <script src="{{ asset('js/api.js') }}"></script>
         <script>
             (function () {
                 'use strict';
@@ -104,20 +115,8 @@
                     box.hidden = false;
                 }
 
-                async function api(path) {
-                    const res = await fetch(path, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem(TOKEN_KEY),
-                        },
-                    });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        const err = new Error(data.message || 'Terjadi kesalahan.');
-                        throw err;
-                    }
-                    return data;
-                }
+                // Header Authorization + refresh token otomatis ditangani public/js/api.js.
+                const api = (path, options) => window.Api.request(path, options);
 
                 function badge(status) {
                     const map = { pending: 'b-pending', accepted: 'b-accepted', declined: 'b-declined' };
@@ -168,6 +167,10 @@
 
                     const g = stats.garages || {};
                     $('#st-garages').textContent = Number(g.free ?? 0)+ ' / '+Number(g.total ?? 0);
+
+                    const rentals = stats.rentals || {};
+                    $('#st-active').textContent = Number(rentals.active_today ?? 0);
+                    $('#st-income').textContent = 'Rp ' + Number(rentals.income_this_month ?? 0).toLocaleString('id-ID');
                 }
 
                 function fillRecent(rows) {
@@ -191,21 +194,9 @@
                     });
                 }
 
-                $('#logout-btn').addEventListener('click', async (event) => {
+                $('#logout-btn').addEventListener('click', (event) => {
                     event.preventDefault();
-                    const token = localStorage.getItem(TOKEN_KEY);
-                    localStorage.removeItem(TOKEN_KEY);
-
-                    if (token) {
-                        try {
-                            await fetch('/api/logout', {
-                                method: 'POST',
-                                headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                            });
-                        } catch (e) { /* token already dead */ }
-                    }
-
-                    window.location.assign('/login');
+                    window.Api.logout();
                 });
 
                 boot();

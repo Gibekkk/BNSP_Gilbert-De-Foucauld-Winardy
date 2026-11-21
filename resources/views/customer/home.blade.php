@@ -139,6 +139,7 @@
             </section>
         </main>
 
+        <script src="{{ asset('js/api.js') }}"></script>
         <script>
             (function () {
                 'use strict';
@@ -167,22 +168,10 @@
                     target.hidden = false;
                 }
 
-                async function api(path, options) {
-                    const res = await fetch(path, Object.assign({
-                        headers: {
-                            'Accept': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem(TOKEN_KEY),
-                        },
-                    }, options || {}));
-
-                    const data = await res.json().catch(() => ({}));
-
-                    if (!res.ok) {
-                        const text = data.errors ? Object.values(data.errors).flat().join(' ') : (data.message || 'Terjadi kesalahan.');
-                        throw new Error(text);
-                    }
-
-                    return data;
+                // Header Authorization + refresh token otomatis ditangani public/js/api.js.
+                // (Versi lama menimpa header Authorization saat mengirim Content-Type.)
+                function api(path, options) {
+                    return window.Api.request(path, options);
                 }
 
                 /* ===== Tabulasi ===== */
@@ -417,21 +406,9 @@
                 $('#veh-form').addEventListener('submit', submitVehicle);
 
                 /* ===== Keluar ===== */
-                $('#logout-btn').addEventListener('click', async (event) => {
+                $('#logout-btn').addEventListener('click', (event) => {
                     event.preventDefault();
-                    const token = localStorage.getItem(TOKEN_KEY);
-                    localStorage.removeItem(TOKEN_KEY);
-
-                    if (token) {
-                        try {
-                            await fetch('/api/logout', {
-                                method: 'POST',
-                                headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                            });
-                        } catch (e) { /* token sudah tidak valid */ }
-                    }
-
-                    window.location.assign('/login');
+                    window.Api.logout();
                 });
 
                 /* ===== Boot ===== */

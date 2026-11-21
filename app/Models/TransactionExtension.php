@@ -29,6 +29,7 @@ class TransactionExtension extends Model
         return [
             'current_end_date' => 'date',
             'new_end_date' => 'date',
+            'extra_rent' => 'integer',
         ];
     }
 }

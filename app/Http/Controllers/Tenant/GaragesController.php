@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
+use App\Services\GarageService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -20,8 +21,11 @@ class GaragesController extends Controller
     /**
      * List every still-free garage with its own pricing (prices live per garage now).
      */
-    public function preview(): JsonResponse
+    public function preview(GarageService $service): JsonResponse
     {
+        // Garasi yang masa sewanya sudah habis harus tampil tersedia lagi.
+        $service->syncUsage();
+
         $data = Garage::query()
             ->where('is_used', false)
             ->orderBy('id')

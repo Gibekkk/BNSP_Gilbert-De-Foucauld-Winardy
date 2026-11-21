@@ -27,7 +27,7 @@ class UpdateGarageRequest extends FormRequest
             // S dan C: harus kosong/nihil. E: opsional saat update (jika diisi, tetap valid).
             'charge_price_kwh' => $isElectric
                 ? ['nullable', 'integer', 'min:1', 'max:10000000']
-                : ['nullable', 'prohib:garage_type_id,S,C'],
+                : ['nullable', 'prohibited'],
         ];
     }
 
@@ -44,7 +44,7 @@ class UpdateGarageRequest extends FormRequest
             'charge_price_kwh.integer' => 'Tarif per kWh harus berupa angka bulat.',
             'charge_price_kwh.min' => 'Tarif per kWh minimal Rp 1/kWh.',
             'charge_price_kwh.max' => 'Tarif per kWh maksimal Rp 10.000.000/kWh.',
-            'charge_price_kwh.prohib' => 'Tarif per kWh hanya berlaku untuk mobil listrik.',
+            'charge_price_kwh.prohibited' => 'Tarif per kWh hanya berlaku untuk mobil listrik.',
         ];
     }
 }

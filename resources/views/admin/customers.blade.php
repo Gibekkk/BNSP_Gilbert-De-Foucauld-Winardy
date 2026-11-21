@@ -26,6 +26,8 @@
             <a href="{{ route('admin') }}" class="tab-btn">Dasbor</a>
             <a href="{{ route('admin.customers') }}" class="tab-btn active" aria-current="page">Verifikasi pelanggan</a>
             <a href="{{ route('admin.garages') }}" class="tab-btn">Kelola garasi</a>
+            <a href="{{ route('admin.rentals') }}" class="tab-btn">Perpanjang sewa</a>
+            <a href="{{ route('admin.reports') }}" class="tab-btn">Laporan</a>
         </nav>
 
         <main class="layout">
@@ -65,6 +67,7 @@
 
         <script src="{{ asset('vendor/jquery.min.js') }}"></script>
         <script src="{{ asset('vendor/datatables/datatables.min.js') }}"></script>
+        <script src="{{ asset('js/api.js') }}"></script>
 
         <script>
             (function () {
@@ -90,22 +93,8 @@
                     showMsg._t = setTimeout(() => { box.hidden = true; }, 6500);
                 }
 
-                async function api(path, options) {
-                    const res = await fetch(path, Object.assign({
-                        headers: {
-                            'Accept': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem(TOKEN_KEY),
-                        },
-                    }, options || {}));
-                    const data = await res.json().catch(() => ({}));
-
-                    if (!res.ok) {
-                        const text = data.errors ? Object.values(data.errors).flat().join(' ') : (data.message || 'Terjadi kesalahan.');
-                        throw new Error(text);
-                    }
-
-                    return data;
-                }
+                // Header Authorization + refresh token otomatis ditangani public/js/api.js.
+                const api = (path, options) => window.Api.request(path, options);
 
                 function badge(status) {
                     const map = { pending: 'b-pending', accepted: 'b-accepted', declined: 'b-declined' };
@@ -259,21 +248,9 @@
                     load().catch((e) => showMsg(e.message));
                 }
 
-                $('#logout-btn').addEventListener('click', async (event) => {
+                $('#logout-btn').addEventListener('click', (event) => {
                     event.preventDefault();
-                    const token = localStorage.getItem(TOKEN_KEY);
-                    localStorage.removeItem(TOKEN_KEY);
-
-                    if (token) {
-                        try {
-                            await fetch('/api/logout', {
-                                method: 'POST',
-                                headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                            });
-                        } catch (e) { /* ignore */ }
-                    }
-
-                    window.location.assign('/login');
+                    window.Api.logout();
                 });
 
                 boot();

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Garage;
+use App\Models\Transaction;
 use App\Models\Vehicle;
+use App\Services\GarageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 
@@ -15,10 +17,13 @@ use Illuminate\Support\Collection;
 class DashboardController extends Controller
 {
     /**
-     * Return counts per status, totals, and the ten newest registrations.
+     * Return counts per status, garage/rental totals, and the ten newest registrations.
      */
-    public function index(): JsonResponse
+    public function index(GarageService $garages): JsonResponse
     {
+        // Pastikan status used mencerminkan sewa yang berjalan hari ini.
+        $garages->syncUsage();
+
         return response()->json([
             'stats' => [
                 'customers' => [
@@ -33,9 +38,29 @@ class DashboardController extends Controller
                     'used' => Garage::query()->where('is_used', true)->count(),
                     'free' => Garage::query()->where('is_used', false)->count(),
                 ],
+                'rentals' => [
+                    'active_today' => Transaction::query()->activeOn()->count(),
+                    'income_this_month' => $this->incomeThisMonth(),
+                ],
             ],
             'recent' => $this->latest(10),
         ]);
+    }
+
+    /**
+     * Rent + charging + extension income of rentals that started this month
+     * (income is counted on the rental's start_date, same as the reports).
+     */
+    private function incomeThisMonth(): int
+    {
+        $rentals = Transaction::query()
+            ->startedBetween(today()->startOfMonth(), today()->endOfMonth())
+            ->withSum('extensions', 'extra_rent')
+            ->get();
+
+        return (int) $rentals->sum(
+            fn (Transaction $t): int => (int) $t->rent_price_total + (int) $t->charge_price_total + (int) $t->extensions_sum_extra_rent,
+        );
     }
 
     /**

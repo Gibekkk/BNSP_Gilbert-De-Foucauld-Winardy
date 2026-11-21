@@ -30,8 +30,11 @@ class GaragesController extends Controller
     /**
      * Paginated garage list (25 per page, ordered by id), optionally filtered by type.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, GarageService $service): JsonResponse
     {
+        // Lepas garasi yang masa sewanya sudah habis sebelum ditampilkan.
+        $service->syncUsage();
+
         $type = trim((string) $request->query('type', ''));
 
         if ($type !== '') {
@@ -44,7 +47,7 @@ class GaragesController extends Controller
             ? $query->where('garage_type_id', $type)
             : $query;
 
-        $garages = Garage::query()->when(true, $scope)->orderBy('id')->forPage($page, self::PER_PAGE)->get();
+        $garages = Garage::query()->with('activeTransaction:id,garage_id,end_date')->when(true, $scope)->orderBy('id')->forPage($page, self::PER_PAGE)->get();
 
         return response()->json([
             'data' => $garages->map(fn (Garage $g): array => $this->shape($g))->values(),
@@ -133,6 +136,9 @@ class GaragesController extends Controller
             'rent_price' => (int) $garage->rent_price,
             'charge_price_kwh' => $garage->charge_price_kwh === null ? null : (int) $garage->charge_price_kwh,
             'is_used' => (bool) $garage->is_used,
+            'rented_until' => $garage->relationLoaded('activeTransaction')
+                ? $garage->activeTransaction?->end_date?->toDateString()
+                : null,
         ];
     }
 }

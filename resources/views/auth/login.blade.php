@@ -54,6 +54,7 @@
             </section>
         </main>
 
+        <script src="{{ asset('js/api.js') }}"></script>
         <script>
             (function () {
                 'use strict';
@@ -134,15 +135,8 @@
                     }
 
                     try {
-                        const res = await fetch('/api/me', {
-                            headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
-                        });
-
-                        if (!res.ok) {
-                            throw new Error('invalid');
-                        }
-
-                        const data = await res.json();
+                        // Api.request mencoba refresh token yang kedaluwarsa sebelum menyerah.
+                        const data = await window.Api.request('/api/me');
                         renderUser(data.user);
                         showSuccess();
                         goByRole(data.user);

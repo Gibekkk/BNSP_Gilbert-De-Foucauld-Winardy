@@ -210,3 +210,32 @@ table.data-table tbody tr:hover { background: #f7f9fd; }
 .edit-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
 
 .hint { font-size: 11.5px; line-height: 1.4; color: var(--muted); margin-top: 5px; }
+
+/* ===== Form umum (dipakai kelola garasi, perpanjang sewa, laporan) ===== */
+.field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+.field input[type="number"], .field input[type="date"], .field input[type="file"] {
+    width: 100%; padding: 9px 12px; font: inherit; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--text);
+}
+.field input[type="date"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+.field input[readonly] { background: var(--bg-2); color: var(--muted); }
+.t-right { text-align: right; }
+.filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-bar select { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); font: inherit; font-size: 13.5px; background: #fff; }
+.btn-ghost-danger { background: transparent; border-color: var(--error-border); color: var(--error-text); }
+.table-scroll { overflow-x: auto; }
+
+/* ===== Perpanjang sewa ===== */
+table.data-table tbody tr.is-selected td { background: #eef3ff; }
+.quote-box { border: 1px dashed var(--border); border-radius: 12px; padding: 12px 16px; margin: 14px 0; background: var(--bg-2); }
+.quote-box .quote-total { font-size: 22px; font-weight: 700; color: var(--primary); }
+.quote-box ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.detail-grid { display: grid; gap: 6px 18px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); font-size: 13.5px; margin-bottom: 8px; }
+.detail-grid span { display: block; font-size: 11.5px; color: var(--muted); }
+
+/* ===== Laporan ===== */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: #fff; border: 1px solid var(--border); margin-bottom: 14px; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.seg button.active { background: var(--primary); color: #fff; }
+.chart-wrap { position: relative; height: 280px; margin-bottom: 16px; }
+table.data-table tfoot td { font-weight: 700; border-top: 2px solid var(--border); padding: 10px 12px; }

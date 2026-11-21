@@ -22,6 +22,8 @@
     <a href="{{ route('admin') }}" class="tab-btn">Dasbor</a>
     <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
     <a href="{{ route('admin.garages') }}" class="tab-btn active" aria-current="page">Kelola garasi</a>
+    <a href="{{ route('admin.rentals') }}" class="tab-btn">Perpanjang sewa</a>
+    <a href="{{ route('admin.reports') }}" class="tab-btn">Laporan</a>
 </nav>
 
 <main class="layout">
@@ -131,6 +133,7 @@
     </section>
 </main>
 
+<script src="{{ asset('js/api.js') }}"></script>
 <script>
 (function () {
     'use strict';
@@ -156,29 +159,9 @@
         }
     }
 
-    async function api(path, options) {
-        const res = await fetch(path, Object.assign({
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token(),
-            },
-        }, options));
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-            let detail = data.message || ('Terjadi kesalahan (HTTP ' + res.status + ').');
-            if (data.errors && typeof data.errors === 'object') {
-                const first = Object.values(data.errors)[0];
-                if (first && first.length) {
-                    detail += ' ' + first.join(' ');
-                }
-            }
-            throw new Error(detail);
-        }
-
-        return data;
-    }
+    // Header Authorization + refresh token otomatis ditangani public/js/api.js.
+    // (Versi lama menimpa header Authorization saat mengirim Content-Type.)
+    const api = (path, options) => window.Api.request(path, options);
 
     /* ===== Kapasitas per tipe ===== */
     async function loadCapacities() {
@@ -212,10 +195,14 @@
     let editing = null; // { id, label, isElectric }
     const rowsCache = {};
 
-    function statusCell(used) {
-        return used
-            ? '<span class="chip warn">Terisi</span>'
-            : '<span class="chip ok">Kosong</span>';
+    function statusCell(used, rentedUntil) {
+        if (!used) {
+            return '<span class="chip ok">Kosong</span>';
+        }
+        const until = rentedUntil
+            ? '<div class="muted" style="font-size:12px">s.d. ' + esc(new Date(rentedUntil + 'T00:00:00').toLocaleDateString('id-ID')) + '</div>'
+            : '';
+        return '<span class="chip warn">Terisi (used)</span>' + until;
     }
 
     async function loadList() {
@@ -250,7 +237,7 @@
                 tr.id = 'row-' + esc(g.id);
                 tr.innerHTML = [
                     '<td><strong>' + esc(g.id) + '</strong> <span class="muted">· ' + esc(g.label) + '</span></td>',
-                    '<td>' + statusCell(Boolean(g.is_used)) + '</td>',
+                    '<td>' + statusCell(Boolean(g.is_used), g.rented_until) + '</td>',
                     '<td>' + rp(g.rent_price) + '<div class="muted" style="font-size:12px">25× = ' + rp(g.rent_price * 25) + '/bulan</div></td>',
                     '<td>' + chargeCell + '</td>',
                     '<td class="t-right"><button type="button" class="btn btn-sm btn-ghost" data-act="edit" data-id="' + esc(g.id) + '">Ubah harga</button></td>',
@@ -426,22 +413,9 @@
         });
     }
 
-    $('#logout-btn').addEventListener('click', async (event) => {
+    $('#logout-btn').addEventListener('click', (event) => {
         event.preventDefault();
-
-        const saved = token();
-        localStorage.removeItem(TOKEN_KEY);
-
-        if (saved) {
-            try {
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + saved },
-                });
-            } catch (_) { /* token sudah tidak valid */ }
-        }
-
-        window.location.replace('/login');
+        window.Api.logout();
     });
 
     async function boot() {
@@ -453,11 +427,7 @@
         let me = null;
 
         try {
-            const res = await fetch('/api/me', { headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token() } });
-            if (!res.ok) {
-                throw new Error('Sesi tidak valid.');
-            }
-            me = (await res.json().catch(() => ({}))).user || null;
+            me = (await api('/api/me')).user || null;
         } catch (_) {
             localStorage.removeItem(TOKEN_KEY);
             window.location.replace('/login');

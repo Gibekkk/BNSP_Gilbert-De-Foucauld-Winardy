@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth as JWT;
 
 class AuthController extends Controller
@@ -160,6 +161,36 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Anda telah keluar.']);
+    }
+
+    /**
+     * Exchange an expired (but still refreshable) JWT for a new one.
+     *
+     * This route is intentionally outside the auth:api middleware, because the
+     * middleware rejects expired tokens — which is exactly when the browser
+     * needs to call it. The old token is blacklisted by the refresh.
+     */
+    public function refresh(): JsonResponse
+    {
+        try {
+            $token = JWT::parseToken()->refresh();
+
+            /** @var User|null $user */
+            $user = JWT::setToken($token)->authenticate();
+        } catch (JWTException) {
+            return response()->json(['message' => 'Sesi berakhir, silakan masuk kembali.'], 401);
+        }
+
+        // A tenant who was declined (or never accepted) must not keep a session alive.
+        if ($user === null || (! $user->is_admin && $user->customer?->status !== Customer::STATUS_ACCEPTED)) {
+            return response()->json(['message' => 'Akun tidak lagi memiliki akses.'], 401);
+        }
+
+        return response()->json([
+            'token' => (string) $token,
+            'token_type' => 'Bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+        ]);
     }
 
     /**

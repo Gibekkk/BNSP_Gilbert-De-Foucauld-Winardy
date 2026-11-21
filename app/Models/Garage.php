@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['id', 'garage_type_id', 'is_used', 'rent_price', 'charge_price_kwh'])]
 class Garage extends Model
@@ -27,6 +28,20 @@ class Garage extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Transaksi yang sedang berjalan hari ini pada garasi ini (paling banyak satu,
+     * karena garasi berstatus used tidak dapat disewa lagi).
+     */
+    public function activeTransaction(): HasOne
+    {
+        $today = today()->toDateString();
+
+        return $this->hasOne(Transaction::class)
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->orderByDesc('end_date');
     }
 
     /**
