@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GaragesController;
 use App\Http\Controllers\Admin\GarageTypesController;
+use App\Http\Controllers\Admin\RentalApprovalsController;
 use App\Http\Controllers\Admin\RentalsController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Auth\AuthController;
@@ -39,6 +40,11 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::post('/admin/garages', [GaragesController::class, 'store']);
     Route::post('/admin/garages/bulk', [GaragesController::class, 'bulk']);
     Route::put('/admin/garages/{garage}', [GaragesController::class, 'update']);
+
+    // Verifikasi sewa baru: setujui / tolak pengajuan penyewa.
+    Route::get('/admin/rental-approvals', [RentalApprovalsController::class, 'index']);
+    Route::post('/admin/rental-approvals/{transaction}/approve', [RentalApprovalsController::class, 'approve']);
+    Route::post('/admin/rental-approvals/{transaction}/decline', [RentalApprovalsController::class, 'decline']);
 
     // Perpanjang status garasi: sewa aktif hari ini, pratinjau biaya, simpan + bukti bayar.
     Route::get('/admin/rentals', [RentalsController::class, 'index']);

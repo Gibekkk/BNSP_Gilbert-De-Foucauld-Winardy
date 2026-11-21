@@ -296,9 +296,18 @@
                     const ext = r.extensions.length ? '<div class="muted">+ perpanjangan ' + rp(r.extension_total) + '</div>' : '';
                     const charge = r.charge_price_total ? '<div class="muted">termasuk isi listrik ' + rp(r.charge_price_total) + '</div>' : '';
                     const proof = r.transaction_proof_url ? ' · <a class="link" href="' + esc(r.transaction_proof_url) + '" target="_blank" rel="noopener">bukti</a>' : '';
-                    const status = isActive
-                        ? '<span class="chip warn">Berjalan</span>' + (r.extensions.length ? ' <span class="chip muted-chip">' + r.extensions.length + '× diperpanjang</span>' : '')
-                        : '<span class="chip muted-chip">Selesai</span>';
+                    // Status verifikasi admin: pending → disetujui / ditolak.
+                    let status;
+                    if (r.status === 'pending') {
+                        status = '<span class="chip warn">Menunggu verifikasi</span>';
+                    } else if (r.status === 'declined') {
+                        status = '<span class="chip fail">Ditolak</span>' + (r.status_note ? '<div class="muted">Alasan: ' + esc(r.status_note) + '</div>' : '');
+                    } else {
+                        status = isActive ? '<span class="chip ok">Disetujui · berjalan</span>' : '<span class="chip muted-chip">Selesai</span>';
+                    }
+                    if (r.extensions.length) {
+                        status += ' <span class="chip muted-chip">' + r.extensions.length + '× diperpanjang</span>';
+                    }
 
                     return [
                         '<tr>',

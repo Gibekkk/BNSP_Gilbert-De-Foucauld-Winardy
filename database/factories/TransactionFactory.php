@@ -27,6 +27,8 @@ class TransactionFactory extends Factory
             'battery_level' => null,
             'rent_price_total' => random_int(10, 200) * 1000,
             'transaction_proof' => 'penyewa/'.Str::uuid().'.jpg',
+            'status' => Transaction::STATUS_APPROVED,
+            'verified_at' => now(),
         ];
     }
 
@@ -39,5 +41,21 @@ class TransactionFactory extends Factory
             'is_monthly' => true,
             'end_date' => now()->addDays(30)->toDateString(),
         ]);
+    }
+
+    /**
+     * State sewa yang masih menunggu verifikasi admin.
+     */
+    public function pending(): static
+    {
+        return $this->state(['status' => Transaction::STATUS_PENDING, 'verified_at' => null]);
+    }
+
+    /**
+     * State sewa yang ditolak admin.
+     */
+    public function declined(): static
+    {
+        return $this->state(['status' => Transaction::STATUS_DECLINED, 'status_note' => 'Bukti tidak valid.']);
     }
 }

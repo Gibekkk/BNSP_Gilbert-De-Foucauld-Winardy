@@ -113,12 +113,18 @@ class RentalExtensionService
     }
 
     /**
-     * Tolak transaksi yang tidak sedang berjalan hari ini.
+     * Tolak transaksi yang belum disetujui admin atau tidak sedang berjalan hari ini.
      *
      * @throws ValidationException
      */
     private function assertActive(Transaction $transaction): void
     {
+        if ($transaction->status !== Transaction::STATUS_APPROVED) {
+            throw ValidationException::withMessages([
+                'transaction' => 'Hanya sewa yang sudah disetujui admin yang dapat diperpanjang.',
+            ]);
+        }
+
         $today = today();
 
         if ($transaction->start_date->greaterThan($today) || $transaction->end_date->lessThan($today)) {

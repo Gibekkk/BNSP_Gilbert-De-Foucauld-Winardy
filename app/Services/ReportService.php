@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 /**
  * Laporan persewaan garasi.
  *
+ * Hanya sewa yang sudah disetujui admin (approved) yang dihitung.
  * Setiap transaksi (termasuk seluruh biaya perpanjangannya) dihitung pada
  * tanggal MULAI sewanya (start_date). Pengelompokan dilakukan di PHP agar
  * kode yang sama berjalan di MySQL maupun SQLite.
@@ -134,13 +135,14 @@ class ReportService
     }
 
     /**
-     * Transaksi yang dimulai dalam rentang tanggal, lengkap dengan total perpanjangan.
+     * Transaksi approved yang dimulai dalam rentang tanggal, lengkap dengan total perpanjangan.
      *
      * @return Collection<int, Transaction>
      */
     private function transactions(?CarbonImmutable $from, ?CarbonImmutable $to): Collection
     {
         return Transaction::query()
+            ->approved()
             ->with(['garage:id,garage_type_id', 'vehicle:id,customer_id', 'vehicle.customer:id,name,nik'])
             ->withSum('extensions', 'extra_rent')
             ->when($from && $to, fn ($query) => $query->startedBetween($from, $to))

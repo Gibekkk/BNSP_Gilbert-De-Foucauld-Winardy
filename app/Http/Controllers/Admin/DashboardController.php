@@ -39,7 +39,8 @@ class DashboardController extends Controller
                     'free' => Garage::query()->where('is_used', false)->count(),
                 ],
                 'rentals' => [
-                    'active_today' => Transaction::query()->activeOn()->count(),
+                    'active_today' => Transaction::query()->approved()->activeOn()->count(),
+                    'pending' => Transaction::query()->pending()->count(),
                     'income_this_month' => $this->incomeThisMonth(),
                 ],
             ],
@@ -54,6 +55,7 @@ class DashboardController extends Controller
     private function incomeThisMonth(): int
     {
         $rentals = Transaction::query()
+            ->approved()
             ->startedBetween(today()->startOfMonth(), today()->endOfMonth())
             ->withSum('extensions', 'extra_rent')
             ->get();

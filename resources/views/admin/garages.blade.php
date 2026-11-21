@@ -22,6 +22,7 @@
     <a href="{{ route('admin') }}" class="tab-btn">Dasbor</a>
     <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
     <a href="{{ route('admin.garages') }}" class="tab-btn active" aria-current="page">Kelola garasi</a>
+    <a href="{{ route('admin.rental-approvals') }}" class="tab-btn">Verifikasi sewa</a>
     <a href="{{ route('admin.rentals') }}" class="tab-btn">Perpanjang sewa</a>
     <a href="{{ route('admin.reports') }}" class="tab-btn">Laporan</a>
 </nav>

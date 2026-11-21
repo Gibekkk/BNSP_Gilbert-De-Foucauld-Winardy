@@ -240,6 +240,7 @@ class RentalService
         return Garage::query()
             ->whereIn('garage_type_id', $types)
             ->whereDoesntHave('transactions', fn ($q) => $q
+                ->holdingGarage()
                 ->whereDate('start_date', '<=', $today)
                 ->whereDate('end_date', '>=', $today))
             ->orderBy('id')
@@ -314,7 +315,8 @@ class RentalService
                 // quote() memeriksa ulang semua aturan (termasuk ketersediaan) di dalam lock.
                 $quote = $this->quote($lockedVehicle, $lockedGarage, $isMonthly, $days, $batteryLevel);
 
-                $transaction = Transaction::query()->create([
+                // Sewa baru selalu berstatus pending sampai diverifikasi admin.
+                $transaction = Transaction::query()->forceCreate([
                     'garage_id' => $lockedGarage->id,
                     'vehicle_id' => $lockedVehicle->id,
                     'start_date' => $quote['start_date'],
@@ -325,8 +327,10 @@ class RentalService
                     'rent_price_total' => $quote['total'],
                     'charge_price_total' => $quote['charge_price'],
                     'transaction_proof' => $path,
+                    'status' => Transaction::STATUS_PENDING,
                 ]);
 
+                // Garasi langsung ditahan (used) walau masih menunggu verifikasi admin.
                 $lockedGarage->forceFill(['is_used' => true])->save();
 
                 return $transaction;
@@ -367,11 +371,14 @@ class RentalService
     }
 
     /**
-     * Transaksi yang rentang [start_date, end_date]-nya bertabrakan dengan [from, to].
+     * Transaksi yang rentang [start_date, end_date]-nya bertabrakan dengan [from, to]
+     * (hanya yang masih menahan garasi: pending atau approved).
      */
     private function overlapping(CarbonInterface $from, CarbonInterface $to, ?int $exceptTransactionId): Builder
     {
+        // Sewa yang ditolak admin tidak lagi menahan garasi maupun kendaraan.
         return Transaction::query()
+            ->holdingGarage()
             ->whereDate('start_date', '<=', $to->toDateString())
             ->whereDate('end_date', '>=', $from->toDateString())
             ->when($exceptTransactionId, fn ($q) => $q->whereKeyNot($exceptTransactionId));

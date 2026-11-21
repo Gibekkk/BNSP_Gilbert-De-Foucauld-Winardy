@@ -48,6 +48,7 @@ class Garage extends Model
         $today = today()->toDateString();
 
         return $this->hasOne(Transaction::class)
+            ->where('status', '!=', Transaction::STATUS_DECLINED)
             ->whereDate('start_date', '<=', $today)
             ->whereDate('end_date', '>=', $today)
             ->orderByDesc('end_date');

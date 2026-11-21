@@ -95,7 +95,9 @@ class GarageService
     {
         $today = today()->toDateString();
 
+        // Sewa pending ikut menahan garasi; sewa declined tidak.
         $active = fn ($query) => $query
+            ->holdingGarage()
             ->whereDate('start_date', '<=', $today)
             ->whereDate('end_date', '>=', $today);
 

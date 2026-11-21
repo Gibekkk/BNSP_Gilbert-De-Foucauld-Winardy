@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Storage;
 class RentalsController extends Controller
 {
     /**
-     * Sewa milik penyewa (terbaru dulu), dipisah menjadi aktif (berjalan hari ini atau setelahnya) dan riwayat.
+     * Sewa milik penyewa (terbaru dulu), dipisah menjadi aktif (pending/approved yang berjalan
+     * hari ini atau setelahnya) dan riwayat (sudah selesai atau ditolak admin).
      */
     public function index(Request $request): JsonResponse
     {
@@ -40,8 +41,9 @@ class RentalsController extends Controller
             ->map(fn (Transaction $t): array => $this->shape($t));
 
         return response()->json([
-            'active' => $rentals->filter(fn (array $r): bool => $r['end_date'] >= $today->toDateString())->values(),
-            'history' => $rentals->filter(fn (array $r): bool => $r['end_date'] < $today->toDateString())->values(),
+            // Sewa yang ditolak admin langsung masuk riwayat.
+            'active' => $rentals->filter(fn (array $r): bool => $r['status'] !== Transaction::STATUS_DECLINED && $r['end_date'] >= $today->toDateString())->values(),
+            'history' => $rentals->filter(fn (array $r): bool => $r['status'] === Transaction::STATUS_DECLINED || $r['end_date'] < $today->toDateString())->values(),
         ]);
     }
 
@@ -64,7 +66,7 @@ class RentalsController extends Controller
     }
 
     /**
-     * Simpan sewa baru beserta bukti pelunasan; status garasi menjadi "used".
+     * Ajukan sewa baru beserta bukti pelunasan; status sewa pending dan garasi menjadi "used".
      */
     public function store(StoreRentalRequest $request, RentalService $rentals): JsonResponse
     {
@@ -83,7 +85,7 @@ class RentalsController extends Controller
 
         return response()->json([
             'message' => sprintf(
-                'Sewa garasi %s berhasil disimpan (%s s.d. %s). Total Rp%s.',
+                'Sewa garasi %s berhasil diajukan (%s s.d. %s). Total Rp%s. Menunggu verifikasi admin.',
                 $transaction->garage_id,
                 $transaction->start_date->format('d/m/Y'),
                 $transaction->end_date->format('d/m/Y'),
@@ -129,6 +131,8 @@ class RentalsController extends Controller
                 'license_plate' => $t->vehicle?->license_plate,
                 'brand' => trim(($t->vehicle?->brand ?? '').' '.($t->vehicle?->brand_type ?? '')),
             ],
+            'status' => $t->status,
+            'status_note' => $t->status_note,
             'is_monthly' => (bool) $t->is_monthly,
             'start_date' => $t->start_date->toDateString(),
             'end_date' => $t->end_date->toDateString(),

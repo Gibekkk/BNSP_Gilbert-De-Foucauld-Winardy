@@ -25,6 +25,7 @@
             <a href="{{ route('admin') }}" class="tab-btn active" aria-current="page">Dasbor</a>
             <a href="{{ route('admin.customers') }}" class="tab-btn">Verifikasi pelanggan</a>
             <a href="{{ route('admin.garages') }}" class="tab-btn">Kelola garasi</a>
+            <a href="{{ route('admin.rental-approvals') }}" class="tab-btn">Verifikasi sewa</a>
             <a href="{{ route('admin.rentals') }}" class="tab-btn">Perpanjang sewa</a>
             <a href="{{ route('admin.reports') }}" class="tab-btn">Laporan</a>
         </nav>
@@ -61,9 +62,13 @@
                     <div class="stat-value" id="st-garages">–/–</div>
                     <div class="stat-label">Garasi tersedia / total</div>
                 </div>
+                <a class="stat-card accent-warn" href="{{ route('admin.rental-approvals') }}" style="text-decoration:none;color:inherit">
+                    <div class="stat-value" id="st-rent-pending">–</div>
+                    <div class="stat-label">Sewa menunggu verifikasi</div>
+                </a>
                 <div class="stat-card">
                     <div class="stat-value" id="st-active">–</div>
-                    <div class="stat-label">Sewa aktif hari ini</div>
+                    <div class="stat-label">Sewa aktif hari ini (disetujui)</div>
                 </div>
                 <div class="stat-card accent-ok">
                     <div class="stat-value" id="st-income">–</div>
@@ -170,6 +175,7 @@
 
                     const rentals = stats.rentals || {};
                     $('#st-active').textContent = Number(rentals.active_today ?? 0);
+                    $('#st-rent-pending').textContent = Number(rentals.pending ?? 0);
                     $('#st-income').textContent = 'Rp ' + Number(rentals.income_this_month ?? 0).toLocaleString('id-ID');
                 }
 

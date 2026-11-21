@@ -168,3 +168,4 @@ input:disabled, select:disabled { opacity: .55; cursor: not-allowed; background:
 .quote-box .quote-total { font-size: 22px; font-weight: 700; color: var(--primary); }
 .quote-box ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
 a.link { color: var(--primary); }
+.chip.fail { background: var(--error-bg); color: var(--error-text); }

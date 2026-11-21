@@ -36,6 +36,7 @@ class RentalsController extends Controller
         $garages->syncUsage();
 
         $rows = Transaction::query()
+            ->approved()
             ->activeOn()
             ->with(['garage', 'vehicle.customer', 'extensions' => fn ($q) => $q->orderBy('id')])
             ->orderBy('garage_id')

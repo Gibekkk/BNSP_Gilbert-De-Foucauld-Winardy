@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Data demo untuk presentasi: garasi tiap tipe, beberapa penyewa beserta
  * kendaraannya, serta riwayat sewa ±14 bulan terakhir (sebagian masih aktif
- * hari ini, sebagian pernah diperpanjang) agar laporan dan fitur perpanjang
- * sewa langsung terisi.
+ * hari ini, sebagian pernah diperpanjang, beberapa menunggu verifikasi atau
+ * ditolak) agar laporan, verifikasi sewa, dan perpanjang sewa langsung terisi.
  *
  * Semua data mematuhi aturan bisnis di RentalService: tipe kendaraan ↔ tipe
  * garasi, sewa harian maks. (jumlah hari bulan mulai - 1), sewa bulanan
@@ -94,7 +94,15 @@ class DemoRentalSeeder extends Seeder
                     $charge = $rentals->chargePrice((int) $vehicle->battery_capacity, $level, (int) $garage->charge_price_kwh);
                 }
 
-                $transaction = Transaction::query()->create([
+                // Status demo: sewa yang baru diajukan (mulai kemarin/hari ini) masih
+                // menunggu verifikasi, ±5% sewa lama ditolak, sisanya disetujui.
+                $status = match (true) {
+                    $start->greaterThanOrEqualTo($today->subDay()) => Transaction::STATUS_PENDING,
+                    $end->lessThan($today) && mt_rand(1, 100) <= 5 => Transaction::STATUS_DECLINED,
+                    default => Transaction::STATUS_APPROVED,
+                };
+
+                $transaction = Transaction::query()->forceCreate([
                     'garage_id' => $garage->id,
                     'vehicle_id' => $vehicle->id,
                     'start_date' => $start->toDateString(),
@@ -105,10 +113,13 @@ class DemoRentalSeeder extends Seeder
                     'rent_price_total' => $rentals->rentPrice($daily, $isMonthly, $days) + $charge,
                     'charge_price_total' => $charge,
                     'transaction_proof' => self::PROOF_PATH,
+                    'status' => $status,
+                    'status_note' => $status === Transaction::STATUS_DECLINED ? 'Bukti pelunasan tidak sesuai nominal.' : null,
+                    'verified_at' => $status === Transaction::STATUS_PENDING ? null : $start->setTime(10, 0),
                 ]);
 
-                // ±15% sewa pernah diperpanjang admin.
-                if (mt_rand(1, 100) <= 15) {
+                // ±15% sewa yang disetujui pernah diperpanjang admin.
+                if ($status === Transaction::STATUS_APPROVED && mt_rand(1, 100) <= 15) {
                     $newEnd = $end->addDays(mt_rand(1, 20));
                     $quote = $rentals->extensionBreakdown($daily, $end, $newEnd);
 
