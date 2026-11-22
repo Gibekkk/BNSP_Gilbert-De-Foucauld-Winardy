@@ -1,58 +1,87 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplikasi Penyewaan Garasi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk mengelola penyewaan slot garasi dan seluruh transaksi sewanya. Tersedia dua portal berbasis peran — **pelanggan (penyewa)** dan **admin**. Web ini dibuat dengan tujuan menyelesaikan uji praktik LSP atau BNSP untuk microcredential syarat kelulusan.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Portal Pelanggan
+- Pendaftaran menggunakan NIK, ponsel, dan email (perlu verifikasi admin menggunakan NIK)
+- Kelola kendaraan pribadi: tambah dan ubah data
+- Jelajahi garasi tersedia serta pratinjau biaya sewa
+- Ajukan sewa baru dan pantau riwayat beserta status sewaan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Portal Admin
+- Dasbor berisi indikator kondisi garasi dan transaksi terkini
+- Verifikasi pendaftaran pelanggan: terima atau tolak
+- Kelola garasi: tipe, kapasitas per tipe, dan penetapan harga slot (termasuk pengisian massal)
+- Verifikasi pengajuan sewa baru: setujui atau tolak
+- Perluasan sewa aktif dengan pratinjau biaya dan unggah bukti pembayaran (gambar, maksimal 5 MB)
+- Laporan sewa yang dapat dikelompokkan per bulan, per hari, per tipe garasi, atau per penyewa, lengkap dengan filter tahun/bulan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Teknologi
 
-## Learning Laravel
+| Component | Choice |
+| --- | --- |
+| Framework | Laravel 13 (PHP 8.3+) |
+| Auth | JWT (tymon/jwt-auth) + refresh token |
+| Basis data | MySQL / MariaDB |
+| Frontend | Blade view per modul, CSS vanilla |
+| Build asset | Vite |
+| Testing | PHPUnit (unit + feature), environment SQLite in-memory |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Prasyarat
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.3+ dengan ekstensi `mbstring`, `pdo_mysql`, `openssl`, `xml` atau dapat menggunakan flake Nix yang terlampir (`nix develop`)
+- Composer 2.x
+- Node.js 20+
+- MySQL atau MariaDB berjalan di `127.0.0.1:3306` (atau sesuaikan)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalasi
 
 ```bash
-composer require laravel/boost --dev
+git clone <url-repo> && cd <nama-repo>
 
-php artisan boost:install
+composer install
+
+cp .env.example .env
+
+php artisan key:generate
+php artisan jwt:secret          # menulis JWT_SECRET ke .env
+
+php artisan migrate --seed      # skema tabel + akun demo
+
+npm install --ignore-scripts
+npm run build
+
+php artisan serve                 # menjalankan server lokal, Vite, dan listener log/antrian
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Web dapat diakses di `http://localhost:8000`.
 
-## Contributing
+## Akun Demo (hasil seeder)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Kedua akun menggunakan kata sandi `password`:
 
-## Code of Conduct
+| Email | Peran |
+| --- | --- |
+| `admin@example.com` | Admin |
+| `pelanggan@example.com` | Penyewa contoh yang sudah diapprove akunnya |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Untuk memulai ulang kondisi bersih:
 
-## Security Vulnerabilities
+```bash
+php artisan migrate:fresh --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Menjalankan Uji (Test)
 
-## License
+```bash
+composer test                   # setara php artisan config:clear && php artisan test
+# atau
+php artisan test                # unit + feature
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `tests/Unit` untuk logika bisnis pada model dan service (contoh: perhitungan harga dan perpanjangan sewa).
+- `tests/Feature` untuk alur end-to-end per fitur: autentikasi, verifikasi pelanggan, kelola garasi, persetujuan sewa, perpanjangan sewa, akses berkas bukti bayar, laporan.
+
+Lingkungan uji memakai SQLite in-memory yang dapat diubah pada konfigurasi `phpunit.xml`.
