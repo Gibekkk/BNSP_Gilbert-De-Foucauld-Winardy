@@ -120,8 +120,8 @@
                         <div class="rent-step" id="r-battery-step" hidden>
                             <h4><span class="num">4</span>Sisa baterai saat ini</h4>
                             <div class="field" style="max-width:280px">
-                                <label for="r-battery">Sisa baterai (kWh)</label>
-                                <input type="number" id="r-battery" min="0" step="1" inputmode="numeric">
+                                <label for="r-battery">Sisa baterai (%)</label>
+                                <input type="number" id="r-battery" min="0" max="100" step="1" inputmode="numeric" placeholder="contoh: 20">
                                 <span class="muted" id="r-battery-hint"></span>
                             </div>
                         </div>
@@ -212,7 +212,7 @@
                         </div>
 
                         <div class="field hide" id="fwrap-kwh">
-                            <label for="f-kwh">Kapasitas baterai (kWh)</label>
+                            <label for="f-kwh">Kapasitas baterai (kW)</label>
                             <input type="number" id="f-kwh" min="1" max="300" placeholder="contoh: 60">
                             <span class="field-err"></span>
                         </div>
@@ -293,7 +293,9 @@
                 }
 
                 function rentalRow(r, isActive) {
-                    const ext = r.extensions.length ? '<div class="muted">+ perpanjangan ' + rp(r.extension_total) + '</div>' : '';
+                    // Rincian setiap perpanjangan oleh admin: tanggal selesai lama → baru dan biayanya.
+                    const ext = r.extensions.map((e) => '<div class="muted">+ perpanjangan ' + fmtDate(e.current_end_date) + ' → ' +
+                        fmtDate(e.new_end_date) + ': ' + rp(e.extra_rent) + '</div>').join('');
                     const charge = r.charge_price_total ? '<div class="muted">termasuk isi listrik ' + rp(r.charge_price_total) + '</div>' : '';
                     const proof = r.transaction_proof_url ? ' · <a class="link" href="' + esc(r.transaction_proof_url) + '" target="_blank" rel="noopener">bukti</a>' : '';
                     // Status verifikasi admin: pending → disetujui / ditolak.
@@ -433,8 +435,8 @@
                     $('#r-battery-step').hidden = !show;
                     $('#r-proof-num').textContent = show ? '5' : '4';
                     if (show) {
-                        $('#r-battery').max = rent.vehicle.battery_capacity;
-                        $('#r-battery-hint').textContent = 'Kapasitas baterai ' + rent.vehicle.battery_capacity + ' kWh. Mobil wajib diisi hingga penuh; biaya isi listrik ditambahkan ke total sewa.';
+                        $('#r-battery').max = 100;
+                        $('#r-battery-hint').textContent = 'Isi 0–100 %. Kapasitas baterai ' + rent.vehicle.battery_capacity + ' kW. Mobil wajib diisi hingga penuh; biaya isi listrik ditambahkan ke total sewa.';
                     }
                 }
 
@@ -525,7 +527,11 @@
                         if (raw === '') {
                             return null;
                         }
-                        payload.battery_level = parseInt(raw, 10);
+                        const pct = parseInt(raw, 10);
+                        if (!(pct >= 0 && pct <= 100)) {
+                            return null;
+                        }
+                        payload.battery_level = pct;
                     }
 
                     return payload;
@@ -562,7 +568,8 @@
                                 : 'Sewa harian: ' + q.days + ' hari × ' + rp(q.daily_price) + ' = ' + rp(q.rent_price),
                         ];
                         if (q.battery_level !== null) {
-                            lines.push('Isi listrik hingga penuh: (' + rent.vehicle.battery_capacity + ' − ' + q.battery_level + ') kWh × ' + rp(rent.garage.charge_price_kwh) + ' = ' + rp(q.charge_price));
+                            lines.push('Isi listrik hingga penuh: ' + rent.vehicle.battery_capacity + ' kW × (100% − ' + q.battery_level + '%) = ' +
+                                Number(q.charge_energy).toLocaleString('id-ID') + ' kWh × ' + rp(rent.garage.charge_price_kwh) + ' = ' + rp(q.charge_price));
                         }
                         lines.push('Periode: ' + fmtDate(q.start_date) + ' – ' + fmtDate(q.end_date));
                         $('#r-breakdown').innerHTML = lines.map((l) => '<li>' + esc(l) + '</li>').join('');
@@ -582,7 +589,7 @@
 
                     if (!rent.vehicle) { rentMsg('Pilih kendaraan terlebih dahulu.'); return; }
                     if (!rent.garage) { rentMsg('Pilih garasi yang tersedia.'); return; }
-                    if (!payload) { rentMsg(needsBattery() ? 'Isi sisa baterai (kWh).' : 'Isi jumlah hari sewa.'); return; }
+                    if (!payload) { rentMsg(needsBattery() ? 'Isi sisa baterai (0–100 %).' : 'Isi jumlah hari sewa.'); return; }
                     if (!file) { rentMsg('Bukti pelunasan biaya wajib diunggah.'); return; }
                     if (file.size > 5 * 1024 * 1024) { rentMsg('Ukuran bukti pelunasan maksimal 5 MB.'); return; }
 
@@ -674,7 +681,7 @@
                     body.innerHTML = '';
 
                     vehicles.forEach((veh) => {
-                        const battery = veh.battery_capacity === null ? '—' : Number(veh.battery_capacity).toLocaleString('id-ID') + ' kWh';
+                        const battery = veh.battery_capacity === null ? '—' : Number(veh.battery_capacity).toLocaleString('id-ID') + ' kW';
 
                         body.insertAdjacentHTML('beforeend', [
                             '<tr>',
@@ -787,7 +794,7 @@
                         const kwh = parseInt(kwhInput.value, 10);
 
                         if (!Number.isFinite(kwh) || kwh < 1 || kwh > 300) {
-                            setField('#fwrap-kwh', 'Kapasitas baterai harus antara 1–300 kWh.');
+                            setField('#fwrap-kwh', 'Kapasitas baterai harus antara 1–300 kW.');
                             return;
                         }
 

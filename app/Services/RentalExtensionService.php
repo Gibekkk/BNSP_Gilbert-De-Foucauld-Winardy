@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Models\Transaction;
 use App\Models\TransactionExtension;
+use App\Support\ProofFile;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Throwable;
@@ -29,7 +29,7 @@ use Throwable;
  */
 class RentalExtensionService
 {
-    /** Folder (disk public) untuk bukti bayar perpanjangan dari admin. */
+    /** Folder (disk privat "local") untuk bukti bayar perpanjangan dari admin. */
     public const PROOF_DIRECTORY = 'proofs/extensions';
 
     /**
@@ -79,7 +79,7 @@ class RentalExtensionService
      */
     public function extend(Transaction $transaction, string $newEndDate, UploadedFile $proof): TransactionExtension
     {
-        $path = $proof->store(self::PROOF_DIRECTORY, 'public');
+        $path = ProofFile::store($proof, self::PROOF_DIRECTORY);
 
         try {
             return DB::transaction(function () use ($transaction, $newEndDate, $path): TransactionExtension {
@@ -106,7 +106,7 @@ class RentalExtensionService
             });
         } catch (Throwable $e) {
             // Jangan tinggalkan file yatim bila penyimpanan gagal.
-            Storage::disk('public')->delete($path);
+            ProofFile::delete($path);
 
             throw $e;
         }

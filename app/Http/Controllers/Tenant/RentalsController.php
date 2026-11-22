@@ -12,9 +12,9 @@ use App\Models\TransactionExtension;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\RentalService;
+use App\Support\ProofFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Sewa milik penyewa: daftar "Sewaan saya", pratinjau harga, dan sewa baru (Sewa Baru).
@@ -141,7 +141,7 @@ class RentalsController extends Controller
             'charge_price_total' => (int) $t->charge_price_total,
             'extension_total' => $extensionTotal,
             'grand_total' => (int) $t->rent_price_total + $extensionTotal,
-            'transaction_proof_url' => $t->transaction_proof ? Storage::disk('public')->url($t->transaction_proof) : null,
+            'transaction_proof_url' => ProofFile::url($t->transaction_proof),
             'extensions' => $t->extensions->map(fn (TransactionExtension $e): array => [
                 'current_end_date' => $e->current_end_date->toDateString(),
                 'new_end_date' => $e->new_end_date->toDateString(),

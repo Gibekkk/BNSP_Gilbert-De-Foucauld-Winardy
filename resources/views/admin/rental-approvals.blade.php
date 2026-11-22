@@ -106,7 +106,7 @@
 
     function row(r) {
         const battery = r.battery_level !== null
-            ? '<div class="muted">Baterai ' + Number(r.battery_level) + ' / ' + Number(r.vehicle.battery_capacity) + ' kWh</div>'
+            ? '<div class="muted">Sisa baterai ' + Number(r.battery_level) + '% · kapasitas ' + Number(r.vehicle.battery_capacity) + ' kW</div>'
             : '';
         const charge = r.charge_price_total ? '<div class="muted">termasuk listrik ' + rp(r.charge_price_total) + '</div>' : '';
 

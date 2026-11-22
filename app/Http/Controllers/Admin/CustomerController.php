@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Support\NikInspector;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,9 +14,10 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     /**
-     * Daftar semua pendaftaran pelanggan (terbaru dulu) beserta email akunnya.
+     * Daftar semua pendaftaran pelanggan (terbaru dulu) beserta email akunnya dan
+     * hasil pembacaan struktur NIK untuk membantu verifikasi manual.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, NikInspector $inspector): JsonResponse
     {
         $status = $request->query('status');
 
@@ -25,6 +27,13 @@ class CustomerController extends Controller
                 'errors' => ['status' => ['Filter status tidak dikenal.']],
             ], 422);
         }
+
+        // Jumlah pendaftaran yang pernah ditolak per NIK (petunjuk tambahan untuk admin).
+        $declinedByNik = Customer::query()
+            ->where('status', Customer::STATUS_DECLINED)
+            ->selectRaw('nik, COUNT(*) as total')
+            ->groupBy('nik')
+            ->pluck('total', 'nik');
 
         $customers = Customer::query()
             ->with('user:id,email')
@@ -39,6 +48,10 @@ class CustomerController extends Controller
                 'status' => $customer->status,
                 'email' => $customer->user?->email ?? '–',
                 'created_at' => $customer->created_at?->toIso8601String() ?? '',
+                'nik_check' => $inspector->inspect($customer->nik),
+                // Penolakan sebelumnya untuk NIK yang sama (tidak termasuk baris ini sendiri).
+                'declined_before' => max(0, (int) ($declinedByNik[$customer->nik] ?? 0)
+                    - ($customer->status === Customer::STATUS_DECLINED ? 1 : 0)),
             ]);
 
         return response()->json(['data' => $customers]);

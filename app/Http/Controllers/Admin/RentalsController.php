@@ -9,9 +9,9 @@ use App\Models\Transaction;
 use App\Models\TransactionExtension;
 use App\Services\GarageService;
 use App\Services\RentalExtensionService;
+use App\Support\ProofFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Validator;
  */
 class RentalsController extends Controller
 {
+    /** Jumlah baris maksimum riwayat perpanjangan. */
+    private const HISTORY_LIMIT = 100;
+
 
     private const VEHICLE_LABELS = [
         'sepeda' => 'Sepeda',
@@ -45,6 +48,39 @@ class RentalsController extends Controller
             ->values();
 
         return response()->json(['data' => $rows, 'today' => today()->toDateString()]);
+    }
+
+    /**
+     * Riwayat semua perpanjangan sewa (terbaru dulu), termasuk sewa yang sudah selesai.
+     */
+    public function history(): JsonResponse
+    {
+        $rows = TransactionExtension::query()
+            ->with(['transaction.garage', 'transaction.vehicle.customer'])
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(self::HISTORY_LIMIT)
+            ->get()
+            ->map(function (TransactionExtension $e): array {
+                $t = $e->transaction;
+
+                return [
+                    'id' => $e->id,
+                    'transaction_id' => $t?->id,
+                    'garage_id' => $t?->garage_id,
+                    'garage_label' => GarageType::labelFor($t?->garage?->garage_type_id),
+                    'customer_name' => $t?->vehicle?->customer?->name ?? '-',
+                    'vehicle' => trim(($t?->vehicle?->license_plate ?? '').' '.($t?->vehicle?->brand ?? '').' '.($t?->vehicle?->brand_type ?? '')),
+                    'current_end_date' => $e->current_end_date->toDateString(),
+                    'new_end_date' => $e->new_end_date->toDateString(),
+                    'extra_rent' => (int) $e->extra_rent,
+                    'transaction_proof_url' => $this->url($e->transaction_proof),
+                    'created_at' => $e->created_at?->toIso8601String(),
+                ];
+            })
+            ->values();
+
+        return response()->json(['data' => $rows]);
     }
 
     /**
@@ -133,10 +169,10 @@ class RentalsController extends Controller
     }
 
     /**
-     * URL publik file bukti (disk "public", perlu `php artisan storage:link`).
+     * URL sementara (bertanda tangan) untuk membuka file bukti.
      */
     private function url(?string $path): ?string
     {
-        return $path ? Storage::disk('public')->url($path) : null;
+        return ProofFile::url($path);
     }
 }

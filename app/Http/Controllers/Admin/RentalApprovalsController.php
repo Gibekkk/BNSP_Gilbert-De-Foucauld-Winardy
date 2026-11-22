@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\GarageType;
 use App\Models\Transaction;
 use App\Services\RentalVerificationService;
+use App\Support\ProofFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 /**
@@ -133,7 +133,7 @@ class RentalApprovalsController extends Controller
             'battery_level' => $t->battery_level,
             'rent_price_total' => (int) $t->rent_price_total,
             'charge_price_total' => (int) $t->charge_price_total,
-            'transaction_proof_url' => $t->transaction_proof ? Storage::disk('public')->url($t->transaction_proof) : null,
+            'transaction_proof_url' => ProofFile::url($t->transaction_proof),
         ];
     }
 }

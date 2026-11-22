@@ -9,9 +9,9 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\GarageService;
 use App\Services\RentalService;
+use App\Support\ProofFile;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Data demo untuk presentasi: garasi tiap tipe, beberapa penyewa beserta
@@ -45,7 +45,7 @@ class DemoRentalSeeder extends Seeder
         }
 
         mt_srand(20261121);
-        Storage::disk('public')->put(self::PROOF_PATH, base64_decode(self::PROOF_PNG));
+        ProofFile::put(self::PROOF_PATH, base64_decode(self::PROOF_PNG));
 
         // 1) Garasi: dibuat lewat GarageService agar kode S001/C001/E001 sesuai aturan.
         $garages->createBulk('S', 6, 5000, null);
@@ -90,7 +90,8 @@ class DemoRentalSeeder extends Seeder
                 $charge = 0;
                 $level = null;
                 if ($garage->garage_type_id === 'E' && $vehicle->type === 'mobil_listrik') {
-                    $level = mt_rand(5, max(5, (int) $vehicle->battery_capacity - 5));
+                    // Sisa baterai saat masuk garasi, dalam persen.
+                    $level = mt_rand(5, 90);
                     $charge = $rentals->chargePrice((int) $vehicle->battery_capacity, $level, (int) $garage->charge_price_kwh);
                 }
 

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *  - rent_price_total   : total biaya sewa baru = sewa (harian x hari, atau 25 x harian
  *                         untuk bulanan) + biaya isi listrik (akumulatif)
  *  - charge_price_total : bagian biaya isi listrik di dalam rent_price_total (0 bila tidak berlaku)
+ * battery_level = sisa baterai mobil listrik saat masuk garasi E, dalam persen (0..100).
  * Biaya perpanjangan disimpan terpisah di transaction_extensions; end_date
  * selalu berisi tanggal selesai terkini (sudah termasuk perpanjangan).
  *

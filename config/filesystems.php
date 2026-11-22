@@ -34,6 +34,9 @@ return [
             'driver' => 'local',
             'root' => storage_path('app/private'),
             'serve' => true,
+            // Bukti pembayaran dilayani lewat URL bertanda tangan di /private-storage/...
+            // (path berbeda dari symlink public/storage agar tidak bertabrakan).
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/private-storage',
             'throw' => false,
             'report' => false,
         ],

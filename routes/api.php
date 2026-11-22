@@ -48,6 +48,7 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
 
     // Perpanjang status garasi: sewa aktif hari ini, pratinjau biaya, simpan + bukti bayar.
     Route::get('/admin/rentals', [RentalsController::class, 'index']);
+    Route::get('/admin/rentals/extensions', [RentalsController::class, 'history']);
     Route::get('/admin/rentals/{transaction}/quote', [RentalsController::class, 'quote']);
     Route::post('/admin/rentals/{transaction}/extend', [RentalsController::class, 'extend']);
 

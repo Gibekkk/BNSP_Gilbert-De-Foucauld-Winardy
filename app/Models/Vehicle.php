@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Kendaraan milik penyewa (sepeda, sepeda motor, mobil, mobil listrik).
+ * battery_capacity = kapasitas baterai mobil listrik dalam kW (tidak pernah dikurangi).
  */
 #[Fillable(['customer_id', 'type', 'license_plate', 'brand', 'brand_type', 'battery_capacity'])]
 class Vehicle extends Model

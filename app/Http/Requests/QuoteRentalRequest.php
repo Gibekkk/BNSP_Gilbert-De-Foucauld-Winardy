@@ -32,7 +32,8 @@ class QuoteRentalRequest extends FormRequest
             'garage_id' => ['required', 'string', 'size:4'],
             'is_monthly' => ['required', 'boolean'],
             'days' => ['exclude_if:is_monthly,1,true', 'required', 'integer', 'min:1', 'max:30'],
-            'battery_level' => ['nullable', 'integer', 'min:0'],
+            // Sisa baterai dalam persen (0..100).
+            'battery_level' => ['nullable', 'integer', 'min:0', 'max:100'],
         ];
     }
 
@@ -52,8 +53,9 @@ class QuoteRentalRequest extends FormRequest
             'days.integer' => 'Jumlah hari harus angka bulat.',
             'days.min' => 'Jumlah hari minimal 1.',
             'days.max' => 'Jumlah hari melebihi batas bulan ini.',
-            'battery_level.integer' => 'Sisa baterai harus angka bulat (kWh).',
-            'battery_level.min' => 'Sisa baterai minimal 0 kWh.',
+            'battery_level.integer' => 'Sisa baterai harus angka bulat (persen).',
+            'battery_level.min' => 'Sisa baterai minimal 0 %.',
+            'battery_level.max' => 'Sisa baterai maksimal 100 %.',
         ];
     }
 }

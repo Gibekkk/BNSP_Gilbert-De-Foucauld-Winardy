@@ -59,6 +59,31 @@
         </div>
     </section>
 
+    <!-- ===== Riwayat semua perpanjangan ===== -->
+    <section class="panel" aria-label="Riwayat perpanjangan">
+        <div class="panel-head">
+            <h3>Riwayat perpanjangan</h3>
+            <span class="hint">Seluruh perpanjangan, termasuk sewa yang sudah selesai (100 terbaru).</span>
+        </div>
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Garasi</th>
+                        <th>Penyewa</th>
+                        <th>Selesai lama → baru</th>
+                        <th class="t-right">Biaya</th>
+                        <th>Bukti</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr class="empty-row"><td colspan="6">Memuat…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- ===== Form perpanjangan ===== -->
     <section class="panel" id="extend-panel" aria-label="Perpanjang sewa" hidden>
         <div class="edit-head">
@@ -178,6 +203,31 @@
             const fresh = rows.find((r) => r.id === selected.id);
             fresh ? openPanel(fresh, true) : closePanel();
         }
+    }
+
+    /* ===== Riwayat semua perpanjangan ===== */
+    async function loadHistory() {
+        const body = $('#history-body');
+        let data;
+
+        try {
+            data = await api('/api/admin/rentals/extensions');
+        } catch (e) {
+            body.innerHTML = '<tr class="empty-row"><td colspan="6">' + esc(e.message) + '</td></tr>';
+            return;
+        }
+
+        const items = data.data || [];
+        body.innerHTML = items.length ? items.map((h) => [
+            '<tr>',
+            '<td>' + esc(h.created_at ? new Date(h.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–') + '</td>',
+            '<td><strong>' + esc(h.garage_id) + '</strong><div class="muted">' + esc(h.garage_label) + '</div></td>',
+            '<td>' + esc(h.customer_name) + '<div class="muted">' + esc(h.vehicle) + '</div></td>',
+            '<td>' + fmtDate(h.current_end_date) + ' → <strong>' + fmtDate(h.new_end_date) + '</strong></td>',
+            '<td class="t-right">' + rp(h.extra_rent) + '</td>',
+            '<td>' + (h.transaction_proof_url ? '<a class="link" href="' + esc(h.transaction_proof_url) + '" target="_blank" rel="noopener">Lihat</a>' : '–') + '</td>',
+            '</tr>',
+        ].join('')).join('') : '<tr class="empty-row"><td colspan="6">Belum ada perpanjangan.</td></tr>';
     }
 
     /* ===== Panel perpanjangan ===== */
@@ -310,6 +360,7 @@
             resetQuote();
             showMsg(res.message, 'ok');
             await load();
+            loadHistory();
         } catch (e) {
             showMsg(e.message);
         } finally {
@@ -336,7 +387,7 @@
         });
         $('#extend-form').addEventListener('submit', submit);
         $('#x-close').addEventListener('click', closePanel);
-        $('#reload-btn').addEventListener('click', load);
+        $('#reload-btn').addEventListener('click', () => { load(); loadHistory(); });
         $('#logout-btn').addEventListener('click', (event) => {
             event.preventDefault();
             window.Api.logout();
@@ -365,6 +416,7 @@
         $('#who-email').textContent = me.email;
         wire();
         load();
+        loadHistory();
     }
 
     boot();

@@ -43,7 +43,7 @@ class VehicleFactory extends Factory
                 : sprintf('B%d%s', random_int(100, 9999), strtoupper(fake()->regexify('[A-Z]{1,2}'))),
             'brand' => fake()->randomElement($brands),
             'brand_type' => fake()->randomElement(['City', 'Beat', 'Vario', 'Avanza', 'Innova', 'Bolt EV', 'Ioniq 5']),
-            // Hanya mobil listrik membawa kapasitas baterai (kWh integer).
+            // Hanya mobil listrik membawa kapasitas baterai (kW, bilangan bulat).
             'battery_capacity' => $type === 'mobil_listrik' ? random_int(40, 80) : null,
         ];
     }
@@ -73,7 +73,7 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * State mobil listrik: memakai plat dan kapasitas baterai (kWh, bilangan bulat).
+     * State mobil listrik: memakai plat dan kapasitas baterai (kW, bilangan bulat).
      */
     public function mobilListrik(): static
     {

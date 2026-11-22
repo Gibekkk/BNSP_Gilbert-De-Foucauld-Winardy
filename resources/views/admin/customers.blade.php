@@ -33,7 +33,7 @@
 
         <main class="layout">
             <h2 class="page-title">Verifikasi Pelanggan</h2>
-            <p class="page-sub">Setujui pendaftaran yang valid, atau tolak secara final. NIK lengkap ditampilkan untuk pengecekan identitas.</p>
+            <p class="page-sub">Setujui pendaftaran yang valid, atau tolak secara final. NIK lengkap ditampilkan beserta hasil pembacaan strukturnya (provinsi, tanggal lahir, jenis kelamin, usia) sebagai bantuan pengecekan identitas.</p>
 
             <div id="global-msg" class="msgbox error" role="alert" hidden></div>
 
@@ -51,6 +51,7 @@
                     <thead>
                         <tr>
                             <th>NIK</th>
+                            <th>Cek NIK</th>
                             <th>No Telepon</th>
                             <th>Nama</th>
                             <th>Email</th>
@@ -60,7 +61,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="empty-row"><td colspan="7">Memuat data…</td></tr>
+                        <tr class="empty-row"><td colspan="8">Memuat data…</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -102,6 +103,32 @@
                     return '<span class="badge-status ' + (map[status] || 'b-pending') + '">' + esc(STATUS_TEXT[status] || status) + '</span>';
                 }
 
+                /** NIK dikelompokkan per bagian: provinsi-kab/kota-kecamatan-tgl lahir-urut. */
+                function nikDigits(nik) {
+                    const s = String(nik || '');
+                    if (!/^\d{16}$/.test(s)) {
+                        return esc(s);
+                    }
+                    const parts = [s.slice(0, 2), s.slice(2, 4), s.slice(4, 6), s.slice(6, 12), s.slice(12)];
+                    return '<span style="font-family:ui-monospace,monospace;letter-spacing:.02em">' + parts.map(esc).join(' ') + '</span>';
+                }
+
+                /** Ringkasan hasil pembacaan NIK dari server, sebagai bantuan verifikasi manual. */
+                function nikCheckCell(row) {
+                    const c = row.nik_check || {};
+                    const lines = [];
+                    if (c.province) { lines.push(esc(c.province) + ' · kab/kota ' + esc(c.regency_code) + ' · kec. ' + esc(c.district_code)); }
+                    if (c.birth_date) {
+                        lines.push(esc(c.gender) + ', lahir ' + esc(new Date(c.birth_date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })) + ' (' + Number(c.age) + ' th)');
+                    }
+                    (c.issues || []).forEach((issue) => lines.push('<span style="color:var(--error-text)">⚠ ' + esc(issue) + '</span>'));
+                    if (row.declined_before > 0) {
+                        lines.push('<span style="color:var(--warn-text)">⚠ NIK ini pernah ditolak ' + Number(row.declined_before) + '×</span>');
+                    }
+                    const head = c.valid ? '<span class="chip ok">Format valid</span>' : '<span class="chip fail">Perlu dicek</span>';
+                    return head + lines.map((l) => '<div class="muted">' + l + '</div>').join('');
+                }
+
                 function actionCell(row) {
                     if (row.status !== 'pending') {
                         return '<span class="muted">–</span>';
@@ -140,7 +167,8 @@
                             pageLength: 10,
                             lengthMenu: [10, 25, 50],
                             columns: [
-                                { data: 'nik' },
+                                { data: 'nik', render: (value) => nikDigits(value) },
+                                { data: null, render: (row) => nikCheckCell(row), orderable: false },
                                 { data: 'phone' },
                                 { data: 'name' },
                                 { data: 'email' },
@@ -164,7 +192,8 @@
                         rowsCache.forEach((row) => {
                             body.insertAdjacentHTML('beforeend', [
                                 '<tr>',
-                                '<td>'+esc(row.nik)+'</td>',
+                                '<td>'+nikDigits(row.nik)+'</td>',
+                                '<td>'+nikCheckCell(row)+'</td>',
                                 '<td>'+esc(row.phone)+'</td>',
                                 '<td>'+esc(row.name)+'</td>',
                                 '<td>'+esc(row.email)+'</td>',
@@ -176,7 +205,7 @@
                         });
 
                         if (!rowsCache.length) {
-                            body.insertAdjacentHTML('beforeend', '<tr class="empty-row"><td colspan="7">Belum ada pelanggan terdaftar.</td></tr>');
+                            body.insertAdjacentHTML('beforeend', '<tr class="empty-row"><td colspan="8">Belum ada pelanggan terdaftar.</td></tr>');
                         }
                     }
                 }

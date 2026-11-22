@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Models\Garage;
 use App\Models\Transaction;
 use App\Models\Vehicle;
+use App\Support\ProofFile;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -29,7 +29,8 @@ use Throwable;
  * - Sewa bulanan: tepat satu bulan = jumlah hari pada bulan MULAI
  * (15 Feb → 28/29 hari, 15 Mei → 31 hari), harga = 25 x harga harian.
  * - Mobil listrik di garasi mobil listrik (E) wajib diisi hingga penuh:
- * (battery_capacity - battery_level) x charge_price_kwh, ditambahkan ke rent_price_total.
+ * battery_capacity (kW) x (100 - battery_level %) / 100 x charge_price_kwh,
+ * dibulatkan ke rupiah terdekat dan ditambahkan ke rent_price_total.
  * - Satu garasi hanya untuk satu kendaraan per hari dan satu kendaraan hanya di satu garasi per hari:
  * rentang tanggal yang bertabrakan ditolak; menyewa lagi di kemudian hari tetap boleh.
  */
@@ -38,7 +39,7 @@ class RentalService
     /** Harga bulanan = pengali ini x harga harian. */
     public const MONTHLY_MULTIPLIER = 25;
 
-    /** Folder (disk public) untuk bukti pelunasan dari penyewa. */
+    /** Folder (disk privat "local") untuk bukti pelunasan dari penyewa. */
     public const PROOF_DIRECTORY = 'proofs/rentals';
 
     /** Tipe garasi yang boleh dipakai setiap tipe kendaraan (S = sepeda/motor, C = mobil, E = mobil listrik). */
@@ -134,19 +135,45 @@ class RentalService
     }
 
     /**
-     * Biaya isi listrik hingga penuh: (kapasitas - sisa baterai) x tarif per kWh.
+     * Energi yang perlu diisi hingga penuh (kWh):
+     * kapasitas baterai (kW) x (100 - sisa baterai %) / 100.
      *
-     * @throws ValidationException when the level is outside 0..capacity
+     * @throws ValidationException bila sisa baterai di luar 0..100 %
      */
-    public function chargePrice(int $batteryCapacity, ?int $batteryLevel, int $pricePerKwh): int
+    public function chargeEnergy(int $batteryCapacity, ?int $batteryPercent): float
     {
-        if ($batteryLevel === null || $batteryLevel < 0 || $batteryLevel > $batteryCapacity) {
+        $this->assertBatteryPercent($batteryPercent);
+
+        return $batteryCapacity * (100 - $batteryPercent) / 100;
+    }
+
+    /**
+     * Biaya isi listrik hingga penuh, dihitung dari sisa baterai (persen):
+     * energi yang diisi x tarif per kWh, dibulatkan ke rupiah terdekat.
+     * Contoh: kapasitas 60 kW, sisa 20 %, tarif Rp2.500
+     * → 60 x 80 % = 48 kWh x Rp2.500 = Rp120.000.
+     *
+     * @throws ValidationException bila sisa baterai di luar 0..100 %
+     */
+    public function chargePrice(int $batteryCapacity, ?int $batteryPercent, int $pricePerKwh): int
+    {
+        $this->assertBatteryPercent($batteryPercent);
+
+        return (int) round($batteryCapacity * (100 - $batteryPercent) * $pricePerKwh / 100);
+    }
+
+    /**
+     * Sisa baterai wajib diisi sebagai persentase bulat 0 sampai 100.
+     *
+     * @throws ValidationException
+     */
+    public function assertBatteryPercent(?int $batteryPercent): void
+    {
+        if ($batteryPercent === null || $batteryPercent < 0 || $batteryPercent > 100) {
             throw ValidationException::withMessages([
-                'battery_level' => sprintf('Sisa baterai wajib diisi, 0 sampai %d kWh.', $batteryCapacity),
+                'battery_level' => 'Sisa baterai wajib diisi dalam persen, 0 sampai 100 %.',
             ]);
         }
-
-        return ($batteryCapacity - $batteryLevel) * $pricePerKwh;
     }
 
     /**
@@ -252,7 +279,10 @@ class RentalService
     /**
      * Hitung sewa baru tanpa menyimpan (ditampilkan ke penyewa sebelum disimpan).
      *
-     * @return array{start_date: string, end_date: string, days: int, is_monthly: bool, daily_price: int, rent_price: int, charge_price: int, battery_level: int|null, total: int}
+     * battery_level adalah sisa baterai dalam persen (0..100); charge_energy adalah
+     * energi yang diisi (kWh) untuk ditampilkan di rincian biaya.
+     *
+     * @return array{start_date: string, end_date: string, days: int, is_monthly: bool, daily_price: int, rent_price: int, charge_price: int, charge_energy: float|null, battery_level: int|null, total: int}
      *
      * @throws ValidationException on any broken rule
      */
@@ -287,6 +317,7 @@ class RentalService
             'daily_price' => $daily,
             'rent_price' => $rent,
             'charge_price' => $charge,
+            'charge_energy' => $charging ? round($this->chargeEnergy((int) $vehicle->battery_capacity, $batteryLevel), 2) : null,
             'battery_level' => $charging ? $batteryLevel : null,
             'total' => $rent + $charge,
         ];
@@ -303,7 +334,7 @@ class RentalService
      */
     public function create(Vehicle $vehicle, Garage $garage, bool $isMonthly, ?int $days, ?int $batteryLevel, UploadedFile $proof): Transaction
     {
-        $path = $proof->store(self::PROOF_DIRECTORY, 'public');
+        $path = ProofFile::store($proof, self::PROOF_DIRECTORY);
 
         try {
             return DB::transaction(function () use ($vehicle, $garage, $isMonthly, $days, $batteryLevel, $path): Transaction {
@@ -336,7 +367,7 @@ class RentalService
                 return $transaction;
             });
         } catch (Throwable $e) {
-            Storage::disk('public')->delete($path);
+            ProofFile::delete($path);
 
             throw $e;
         }
