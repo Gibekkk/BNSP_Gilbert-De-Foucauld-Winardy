@@ -29,7 +29,7 @@ use Throwable;
  * - Sewa bulanan: tepat satu bulan = jumlah hari pada bulan MULAI
  * (15 Feb → 28/29 hari, 15 Mei → 31 hari), harga = 25 x harga harian.
  * - Mobil listrik di garasi mobil listrik (E) wajib diisi hingga penuh:
- * battery_capacity (kW) x (100 - battery_level %) / 100 x charge_price_kwh,
+ * battery_capacity (kWh) x (100 - battery_level %) / 100 x charge_price_kwh,
  * dibulatkan ke rupiah terdekat dan ditambahkan ke rent_price_total.
  * - Satu garasi hanya untuk satu kendaraan per hari dan satu kendaraan hanya di satu garasi per hari:
  * rentang tanggal yang bertabrakan ditolak; menyewa lagi di kemudian hari tetap boleh.
@@ -136,7 +136,7 @@ class RentalService
 
     /**
      * Energi yang perlu diisi hingga penuh (kWh):
-     * kapasitas baterai (kW) x (100 - sisa baterai %) / 100.
+     * kapasitas baterai (kWh) x (100 - sisa baterai %) / 100.
      *
      * @throws ValidationException bila sisa baterai di luar 0..100 %
      */
@@ -150,7 +150,7 @@ class RentalService
     /**
      * Biaya isi listrik hingga penuh, dihitung dari sisa baterai (persen):
      * energi yang diisi x tarif per kWh, dibulatkan ke rupiah terdekat.
-     * Contoh: kapasitas 60 kW, sisa 20 %, tarif Rp2.500
+     * Contoh: kapasitas 60 kWh, sisa 20 %, tarif Rp2.500
      * → 60 x 80 % = 48 kWh x Rp2.500 = Rp120.000.
      *
      * @throws ValidationException bila sisa baterai di luar 0..100 %

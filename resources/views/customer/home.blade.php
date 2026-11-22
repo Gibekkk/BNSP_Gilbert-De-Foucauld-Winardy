@@ -212,7 +212,7 @@
                         </div>
 
                         <div class="field hide" id="fwrap-kwh">
-                            <label for="f-kwh">Kapasitas baterai (kW)</label>
+                            <label for="f-kwh">Kapasitas baterai (kWh)</label>
                             <input type="number" id="f-kwh" min="1" max="300" placeholder="contoh: 60">
                             <span class="field-err"></span>
                         </div>
@@ -436,7 +436,7 @@
                     $('#r-proof-num').textContent = show ? '5' : '4';
                     if (show) {
                         $('#r-battery').max = 100;
-                        $('#r-battery-hint').textContent = 'Isi 0–100 %. Kapasitas baterai ' + rent.vehicle.battery_capacity + ' kW. Mobil wajib diisi hingga penuh; biaya isi listrik ditambahkan ke total sewa.';
+                        $('#r-battery-hint').textContent = 'Isi 0–100 %. Kapasitas baterai ' + rent.vehicle.battery_capacity + ' kWh. Mobil wajib diisi hingga penuh; biaya isi listrik ditambahkan ke total sewa.';
                     }
                 }
 
@@ -568,7 +568,7 @@
                                 : 'Sewa harian: ' + q.days + ' hari × ' + rp(q.daily_price) + ' = ' + rp(q.rent_price),
                         ];
                         if (q.battery_level !== null) {
-                            lines.push('Isi listrik hingga penuh: ' + rent.vehicle.battery_capacity + ' kW × (100% − ' + q.battery_level + '%) = ' +
+                            lines.push('Isi listrik hingga penuh: ' + rent.vehicle.battery_capacity + ' kWh × (100% − ' + q.battery_level + '%) = ' +
                                 Number(q.charge_energy).toLocaleString('id-ID') + ' kWh × ' + rp(rent.garage.charge_price_kwh) + ' = ' + rp(q.charge_price));
                         }
                         lines.push('Periode: ' + fmtDate(q.start_date) + ' – ' + fmtDate(q.end_date));
@@ -681,7 +681,7 @@
                     body.innerHTML = '';
 
                     vehicles.forEach((veh) => {
-                        const battery = veh.battery_capacity === null ? '—' : Number(veh.battery_capacity).toLocaleString('id-ID') + ' kW';
+                        const battery = veh.battery_capacity === null ? '—' : Number(veh.battery_capacity).toLocaleString('id-ID') + ' kWh';
 
                         body.insertAdjacentHTML('beforeend', [
                             '<tr>',
@@ -794,7 +794,7 @@
                         const kwh = parseInt(kwhInput.value, 10);
 
                         if (!Number.isFinite(kwh) || kwh < 1 || kwh > 300) {
-                            setField('#fwrap-kwh', 'Kapasitas baterai harus antara 1–300 kW.');
+                            setField('#fwrap-kwh', 'Kapasitas baterai harus antara 1–300 kWh.');
                             return;
                         }
 

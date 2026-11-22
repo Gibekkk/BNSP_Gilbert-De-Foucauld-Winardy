@@ -35,9 +35,7 @@ class RentalExtensionService
     /**
      * Suntikkan aturan sewa bersama (RentalService).
      */
-    public function __construct(private readonly RentalService $rentals)
-    {
-    }
+    public function __construct(private readonly RentalService $rentals) {}
 
     /**
      * Hitung sisa biaya tanpa menyimpan (pratinjau di layar admin).

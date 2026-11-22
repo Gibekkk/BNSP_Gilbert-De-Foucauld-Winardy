@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
  */
 class GarageTypesController extends Controller
 {
-
     /**
      * Daftar tipe S, C, dan E beserta jumlah terbit dan sisa kapasitasnya.
      */

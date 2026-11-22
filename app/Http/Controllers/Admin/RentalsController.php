@@ -23,7 +23,6 @@ class RentalsController extends Controller
     /** Jumlah baris maksimum riwayat perpanjangan. */
     private const HISTORY_LIMIT = 100;
 
-
     private const VEHICLE_LABELS = [
         'sepeda' => 'Sepeda',
         'sepeda_motor' => 'Sepeda motor',

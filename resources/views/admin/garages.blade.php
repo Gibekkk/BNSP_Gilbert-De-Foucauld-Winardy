@@ -206,6 +206,22 @@
         return '<span class="chip warn">Terisi (used)</span>' + until;
     }
 
+    /**
+     * Tombol untuk garasi yang sedang disewa: Perpanjang (sewa disetujui) membuka
+     * halaman Perpanjang sewa dengan sewa ini langsung terpilih; sewa yang masih
+     * menunggu diarahkan ke halaman Verifikasi sewa.
+     */
+    function rentalAction(g) {
+        const r = g.active_rental;
+        if (!r) {
+            return '';
+        }
+        if (r.status === 'approved') {
+            return '<a class="btn btn-sm btn-primary" href="{{ route('admin.rentals') }}?transaction=' + encodeURIComponent(r.id) + '">Perpanjang</a>';
+        }
+        return '<a class="btn btn-sm btn-ghost" href="{{ route('admin.rental-approvals') }}">Verifikasi</a>';
+    }
+
     async function loadList() {
         const body = $('#garage-body');
         const params = new URLSearchParams({ page: String(state.page) });
@@ -241,7 +257,7 @@
                     '<td>' + statusCell(Boolean(g.is_used), g.rented_until) + '</td>',
                     '<td>' + rp(g.rent_price) + '<div class="muted" style="font-size:12px">25× = ' + rp(g.rent_price * 25) + '/bulan</div></td>',
                     '<td>' + chargeCell + '</td>',
-                    '<td class="t-right"><button type="button" class="btn btn-sm btn-ghost" data-act="edit" data-id="' + esc(g.id) + '">Ubah harga</button></td>',
+                    '<td class="t-right">' + rentalAction(g) + '<button type="button" class="btn btn-sm btn-ghost" data-act="edit" data-id="' + esc(g.id) + '">Ubah harga</button></td>',
                 ].join('');
                 body.appendChild(tr);
             });

@@ -22,9 +22,7 @@ class RentalVerificationService
     /**
      * Suntikkan service garasi untuk melepas status used setelah penolakan.
      */
-    public function __construct(private readonly GarageService $garages)
-    {
-    }
+    public function __construct(private readonly GarageService $garages) {}
 
     /**
      * Setujui sewa yang masih pending.

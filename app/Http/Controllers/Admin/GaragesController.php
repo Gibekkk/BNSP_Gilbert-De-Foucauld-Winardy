@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class GaragesController extends Controller
 {
-
     private const PER_PAGE = 25;
 
     /**
@@ -43,7 +42,7 @@ class GaragesController extends Controller
             ? $query->where('garage_type_id', $type)
             : $query;
 
-        $garages = Garage::query()->with('activeTransaction:id,garage_id,end_date')->when(true, $scope)->orderBy('id')->forPage($page, self::PER_PAGE)->get();
+        $garages = Garage::query()->with('activeTransaction:id,garage_id,end_date,status')->when(true, $scope)->orderBy('id')->forPage($page, self::PER_PAGE)->get();
 
         return response()->json([
             'data' => $garages->map(fn (Garage $g): array => $this->shape($g))->values(),
@@ -134,6 +133,14 @@ class GaragesController extends Controller
             'is_used' => (bool) $garage->is_used,
             'rented_until' => $garage->relationLoaded('activeTransaction')
                 ? $garage->activeTransaction?->end_date?->toDateString()
+                : null,
+            // Sewa yang sedang menahan garasi hari ini (untuk tombol Perpanjang / Verifikasi).
+            'active_rental' => $garage->relationLoaded('activeTransaction') && $garage->activeTransaction !== null
+                ? [
+                    'id' => $garage->activeTransaction->id,
+                    'status' => $garage->activeTransaction->status,
+                    'end_date' => $garage->activeTransaction->end_date->toDateString(),
+                ]
                 : null,
         ];
     }

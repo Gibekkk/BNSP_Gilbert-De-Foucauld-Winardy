@@ -34,14 +34,6 @@ class ProofFile
     }
 
     /**
-     * Simpan isi file mentah (dipakai seeder data demo).
-     */
-    public static function put(string $path, string $contents): void
-    {
-        Storage::disk(self::DISK)->put($path, $contents);
-    }
-
-    /**
      * Hapus file bukti (dipakai saat penyimpanan transaksi gagal).
      */
     public static function delete(?string $path): void

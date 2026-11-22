@@ -150,6 +150,10 @@
 
     let rows = [];
     let selected = null;
+    let preselectId = (() => {
+        const raw = new URLSearchParams(window.location.search).get('transaction');
+        return raw && /^\d+$/.test(raw) ? Number(raw) : null;
+    })();
     let quoteTimer = null;
     let quoteSeq = 0;
 
@@ -197,6 +201,18 @@
             '<td class="t-right"><button type="button" class="btn btn-sm btn-primary" data-act="pick" data-id="' + r.id + '">Perpanjang</button></td>',
             '</tr>',
         ].join('')).join('');
+
+        // Dibuka dari tombol "Perpanjang" di Kelola garasi: pilih sewa dari ?transaction=ID.
+        if (preselectId !== null) {
+            const target = rows.find((r) => r.id === preselectId);
+            preselectId = null;
+            history.replaceState(null, '', window.location.pathname);
+            if (target) {
+                openPanel(target, false);
+                return;
+            }
+            showMsg('Sewa tersebut tidak dapat diperpanjang (belum disetujui atau sudah tidak berjalan hari ini).');
+        }
 
         // Segarkan panel bila transaksi yang dipilih masih ada.
         if (selected) {

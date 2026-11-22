@@ -33,7 +33,7 @@ class StoreVehicleRequest extends FormRequest
             'brand_type' => ['required', 'string', 'max:50'],
             // Sepeda tidak memakai plat; tipe lainnya wajib bernomor.
             'license_plate' => $type === 'sepeda' ? [] : ['required', 'string', 'min:2', 'max:15'],
-            // Hanya mobil listrik yang memiliki kapasitas baterai (kW).
+            // Hanya mobil listrik yang memiliki kapasitas baterai (kWh).
             'battery_capacity' => $type === 'mobil_listrik' ? ['required', 'integer', 'min:1', 'max:300'] : [],
         ];
     }
@@ -57,8 +57,8 @@ class StoreVehicleRequest extends FormRequest
             'license_plate.max' => 'Nomor plat terlalu panjang (maks. 15 karakter).',
             'battery_capacity.required' => 'Kapasitas baterai wajib diisi untuk mobil listrik.',
             'battery_capacity.integer' => 'Kapasitas baterai harus berupa angka.',
-            'battery_capacity.min' => 'Kapasitas baterai minimal 1 kW.',
-            'battery_capacity.max' => 'Kapasitas baterai maksimal 300 kW.',
+            'battery_capacity.min' => 'Kapasitas baterai minimal 1 kWh.',
+            'battery_capacity.max' => 'Kapasitas baterai maksimal 300 kWh.',
         ];
     }
 }
