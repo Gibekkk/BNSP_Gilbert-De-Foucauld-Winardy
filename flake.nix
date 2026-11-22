@@ -26,15 +26,15 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = [
          pkgs.phpPackages.composer
-         # Batas upload dinaikkan agar bukti bayar hingga 5 MB dapat diunggah
-         # (bawaan PHP hanya 2 MB).
          (pkgs.php.buildEnv {
            extraConfig = ''
              upload_max_filesize = 6M
              post_max_size = 8M
            '';
          })
+         pkgs.fish
         ];
+        shellHook = "fish";
       };
     };
 }
