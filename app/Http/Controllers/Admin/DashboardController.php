@@ -71,7 +71,7 @@ class DashboardController extends Controller
     private function latest(int $limit): Collection
     {
         return Customer::query()
-            ->with('user:id,email')
+            ->with('user:id,email,customer_id') // customer_id wajib dipilih agar relasi hasOne dapat dicocokkan
             ->orderByDesc('id')
             ->limit($limit)
             ->get()

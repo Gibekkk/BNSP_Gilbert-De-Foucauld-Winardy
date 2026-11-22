@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dasbor · BNSP</title>
+        <title>Dasbor · Sewa Garasi</title>
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     </head>
     <body>
@@ -11,7 +12,7 @@
             <div class="topbar-left">
                 <span class="brand-mark" aria-hidden="true">B</span>
                 <div class="brand-text">
-                    <strong>BNSP</strong>
+                    <strong>Sewa Garasi</strong>
                     <small>Kelola garasi &amp; pelanggan</small>
                 </div>
             </div>
@@ -32,7 +33,7 @@
 
         <main class="layout">
             <h2 class="page-title">Dasbor Admin</h2>
-            <p class="page-sub">Ringkasan aktivitas, menara pendaftaran menunggu verifikasi, dan status garasi.</p>
+            <p class="page-sub">Ringkasan aktivitas, antrean pendaftaran yang menunggu verifikasi, dan status garasi.</p>
 
             <div id="global-msg" class="msgbox error" role="alert" hidden></div>
 

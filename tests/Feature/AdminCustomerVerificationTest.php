@@ -8,7 +8,8 @@ use Tests\Concerns\InteractsWithApi;
 use Tests\TestCase;
 
 /**
- * Feature test verifikasi pendaftar baru oleh admin (berdasarkan NIK, tanpa foto KTP).
+ * Feature test verifikasi pendaftar baru oleh admin: admin memeriksa NIK yang
+ * dimasukkan lalu menerima atau menolak (tanpa foto KTP).
  */
 class AdminCustomerVerificationTest extends TestCase
 {
@@ -34,22 +35,20 @@ class AdminCustomerVerificationTest extends TestCase
     }
 
     /**
-     * Daftar pendaftar memuat hasil pembacaan NIK dan dapat difilter per status.
+     * Daftar pendaftar menampilkan NIK lengkap dan email, serta dapat difilter per status.
      */
-    public function test_list_includes_nik_check_and_filters_by_status(): void
+    public function test_list_shows_nik_and_email_and_filters_by_status(): void
     {
         $admin = $this->createAdmin();
-        Customer::factory()->create(['nik' => '3578010101900001', 'status' => Customer::STATUS_PENDING]);
-        Customer::factory()->accepted()->create(['nik' => '3201152988071601']);
+        $pending = $this->createTenant('budi@example.com', Customer::STATUS_PENDING);
+        $this->createTenant('siti@example.com');
 
-        $pending = $this->apiAs($admin, 'GET', '/api/admin/customers?status=pending')->assertOk()->json('data');
-        $this->assertCount(1, $pending);
-        $this->assertTrue($pending[0]['nik_check']['valid']);
-        $this->assertSame('Jawa Timur', $pending[0]['nik_check']['province']);
+        $rows = $this->apiAs($admin, 'GET', '/api/admin/customers?status=pending')->assertOk()->json('data');
+        $this->assertCount(1, $rows);
+        $this->assertSame($pending->customer->nik, $rows[0]['nik']);
+        $this->assertSame('budi@example.com', $rows[0]['email']);
 
-        $accepted = $this->apiAs($admin, 'GET', '/api/admin/customers?status=accepted')->json('data');
-        $this->assertFalse($accepted[0]['nik_check']['valid']);
-
+        $this->assertCount(2, $this->apiAs($admin, 'GET', '/api/admin/customers')->json('data'));
         $this->apiAs($admin, 'GET', '/api/admin/customers?status=salah')->assertUnprocessable();
     }
 

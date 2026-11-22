@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Portal Pelanggan · BNSP</title>
+        <title>Portal Pelanggan · Sewa Garasi</title>
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <link rel="stylesheet" href="{{ asset('css/customer.css') }}">
     </head>
     <body>
@@ -11,7 +12,7 @@
             <div class="topbar-left">
                 <span class="brand-mark" aria-hidden="true">B</span>
                 <div class="brand-text">
-                    <strong>BNSP</strong>
+                    <strong>Sewa Garasi</strong>
                     <small>Portal pelanggan</small>
                 </div>
             </div>
@@ -27,7 +28,7 @@
         </nav>
 
         <main class="layout">
-            <h2 class="page-title">Hello, <span id="hello-name">…</span></h2>
+            <h2 class="page-title">Halo, <span id="hello-name">…</span></h2>
             <p class="page-sub">Sewa garasi, pantau sewaan, dan kelola kendaraan Anda di satu tempat.</p>
 
             <div id="global-msg" class="msgbox error" role="alert" hidden></div>
@@ -317,7 +318,7 @@
                         '<td>' + vehicleText(r.vehicle) + '</td>',
                         '<td>' + (r.is_monthly ? 'Bulanan' : 'Harian') + '</td>',
                         '<td>' + fmtDate(r.start_date) + ' – ' + fmtDate(r.end_date) + '</td>',
-                        '<td><strong>' + rp(r.grand_total) + '</strong>' + charge + ext + '<div class="muted">sewa ' + rp(r.rent_price_total) + proof + '</div></td>',
+                        '<td><strong>' + rp(r.grand_total) + '</strong>' + charge + ext + '<div class="muted">biaya awal ' + rp(r.rent_price_total) + proof + '</div></td>',
                         '<td>' + status + '</td>',
                         '</tr>',
                     ].join('');

@@ -149,4 +149,14 @@ class ReportAndDashboardTest extends TestCase
         $this->assertSame(280000, $stats['rentals']['income_this_month']);
         $this->assertSame(4, $stats['garages']['total']);
     }
+
+    /**
+     * Registrasi terbaru di dasbor menampilkan email akun pelanggan.
+     */
+    public function test_dashboard_recent_registrations_show_the_account_email(): void
+    {
+        $recent = $this->apiAs($this->createAdmin(), 'GET', '/api/admin/dashboard')->assertOk()->json('recent');
+
+        $this->assertEqualsCanonicalizing(['budi@example.com', 'siti@example.com'], array_column($recent, 'email'));
+    }
 }

@@ -3,8 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Daftar · BNSP</title>
-        <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+        <title>Daftar · Sewa Garasi</title>
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     </head>
     <body>
         <main class="page">
@@ -170,21 +171,5 @@
                 });
             })();
         </script>
-
-        <style>
-            /* tambahan gaya lokal khusus halaman ini */
-            .sep {
-                border: none;
-                border-top: 1px solid var(--border);
-                margin: 20px 0 14px;
-            }
-
-            .account-hint {
-                font-size: 12.5px;
-                font-weight: 600;
-                letter-spacing: .04em;
-                text-transform: uppercase;
-            }
-        </style>
     </body>
 </html>

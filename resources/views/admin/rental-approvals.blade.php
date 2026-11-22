@@ -3,14 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verifikasi Sewa · BNSP</title>
+    <title>Verifikasi Sewa · Sewa Garasi</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
 <header class="topbar">
     <div class="topbar-left">
         <span class="brand-mark" aria-hidden="true">B</span>
-        <div class="brand-text"><strong>BNSP</strong><small>Dasbor admin</small></div>
+        <div class="brand-text"><strong>Sewa Garasi</strong><small>Dasbor admin</small></div>
     </div>
     <div class="topbar-right">
         <span class="who" id="who-email">–</span>

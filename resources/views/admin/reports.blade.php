@@ -3,14 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Laporan Sewa · BNSP</title>
+    <title>Laporan Sewa · Sewa Garasi</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
 <header class="topbar">
     <div class="topbar-left">
         <span class="brand-mark" aria-hidden="true">B</span>
-        <div class="brand-text"><strong>BNSP</strong><small>Dasbor admin</small></div>
+        <div class="brand-text"><strong>Sewa Garasi</strong><small>Dasbor admin</small></div>
     </div>
     <div class="topbar-right">
         <span class="who" id="who-email">–</span>
@@ -248,9 +249,9 @@
             data: {
                 labels: rows.map(chartLabel),
                 datasets: [
-                    { label: 'Biaya sewa', data: rows.map((r) => r.rent_income), backgroundColor: '#2452c7', stack: 'pendapatan' },
-                    { label: 'Isi listrik', data: rows.map((r) => r.charge_income), backgroundColor: '#1aa36f', stack: 'pendapatan' },
-                    { label: 'Perpanjangan', data: rows.map((r) => r.extension_income), backgroundColor: '#e0a21b', stack: 'pendapatan' },
+                    { label: 'Biaya sewa', data: rows.map((r) => r.rent_income), backgroundColor: '#13213a', stack: 'pendapatan' },
+                    { label: 'Isi listrik', data: rows.map((r) => r.charge_income), backgroundColor: '#2f8f5b', stack: 'pendapatan' },
+                    { label: 'Perpanjangan', data: rows.map((r) => r.extension_income), backgroundColor: '#f2b705', stack: 'pendapatan' },
                 ],
             },
             options: {
@@ -267,6 +268,10 @@
                 },
             },
         };
+
+        // Grafik memakai font aplikasi (Plus Jakarta Sans), bukan font bawaan Chart.js.
+        window.Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+        window.Chart.defaults.color = '#6a7080';
 
         if (chart) {
             chart.destroy();

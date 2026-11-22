@@ -3,8 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Masuk · BNSP</title>
-        <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+        <title>Masuk · Sewa Garasi</title>
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     </head>
     <body>
         <main class="page">
@@ -14,7 +15,7 @@
                     <span class="brand-mark" aria-hidden="true">B</span>
                     <div>
                         <h1>Masuk</h1>
-                        <p>Layanan sewa garasi BNSP. Gunakan email dan password Anda.</p>
+                        <p>Masuk untuk menyewa atau mengelola garasi.</p>
                     </div>
                 </header>
 

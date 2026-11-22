@@ -3,14 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Garasi · BNSP</title>
+    <title>Kelola Garasi · Sewa Garasi</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
 <header class="topbar">
     <div class="topbar-left">
         <span class="brand-mark" aria-hidden="true">B</span>
-        <div class="brand-text"><strong>BNSP</strong><small>Dasbor admin</small></div>
+        <div class="brand-text"><strong>Sewa Garasi</strong><small>Dasbor admin</small></div>
     </div>
     <div class="topbar-right">
         <span class="who" id="who-email">–</span>
@@ -103,7 +104,7 @@
     <section class="panel" aria-label="Daftar slot">
         <div class="filter-bar">
             <label class="muted">Filter:
-                <select id="l-type" style="padding:4px 8px;border-radius:8px;border:1px solid var(--border)">
+                <select id="l-type">
                     <option value="">Semua</option>
                     <option value="S">Sepeda / Motor</option>
                     <option value="C">Mobil</option>

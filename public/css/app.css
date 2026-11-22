@@ -1,0 +1,360 @@
+/* =====================================================================
+   Sewa Garasi · design system bersama (semua halaman)
+   - Font Plus Jakarta Sans disimpan di proyek (public/fonts), bukan font
+     bawaan perangkat pengguna dan bukan dari CDN, sehingga tampilan sama
+     di semua laptop dan tetap tampil saat offline.
+   - Tema: biru aspal + kuning rambu parkir.
+   ===================================================================== */
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url('../fonts/plus-jakarta-sans/plus-jakarta-sans-latin-ext-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+        U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url('../fonts/plus-jakarta-sans/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: italic;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url('../fonts/plus-jakarta-sans/plus-jakarta-sans-latin-wght-italic.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ===== Token ===== */
+:root {
+    --font: 'Plus Jakarta Sans', sans-serif;
+
+    --ink: #13213a;           /* biru aspal: header, tombol utama */
+    --ink-hover: #0b1528;
+    --ink-soft: #24365a;
+    --accent: #f2b705;        /* kuning rambu parkir */
+    --accent-soft: #fff4cc;
+
+    --bg: #f5f4ef;            /* latar putih hangat */
+    --card: #ffffff;
+    --line: #e5e2d8;
+    --line-soft: #efede6;
+    --text: #18202e;
+    --muted: #6a7080;
+
+    --primary: var(--ink);
+    --primary-hover: var(--ink-hover);
+    --ring: rgba(242, 183, 5, .45);
+
+    --ok-bg: #e5f3ea;   --ok-border: #b9dfc7;   --ok-text: #1b6a40;
+    --warn-bg: #fff3cf; --warn-border: #f0d98a; --warn-text: #7f5600;
+    --error-bg: #fbeceb; --error-border: #efc4c1; --error-text: #9c2f2c;
+
+    --radius: 8px;
+    --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; }
+
+/* Atribut hidden harus selalu menang atas display pada class (mis. .field { display: flex }). */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font-family: inherit; }
+
+::selection { background: var(--accent); color: var(--ink); }
+
+/* ===== Header (pita gelap) ===== */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 28px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+
+/* Logo: siluet garasi beratap dengan pintu bergaris (teks di dalamnya disembunyikan) */
+.brand-mark {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    font-size: 0;
+    color: transparent;
+    background:
+        repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 5px) 9px 16px / 16px 14px no-repeat,
+        var(--accent);
+    clip-path: polygon(50% 0, 100% 36%, 100% 100%, 0 100%, 0 36%);
+}
+
+.brand-text strong { display: block; font-size: 15px; font-weight: 750; letter-spacing: -.01em; }
+.brand-text small { display: block; color: rgba(255, 255, 255, .6); font-size: 12px; }
+
+.topbar-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.topbar-right .who { font-size: 13px; color: rgba(255, 255, 255, .72); }
+.topbar .btn-ghost-danger { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .28); }
+.topbar .btn-ghost-danger:hover:not(:disabled) { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .5); }
+
+/* ===== Navigasi tab (menyatu dengan header) ===== */
+.tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    padding: 0 20px;
+    background: var(--ink);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabs .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 14px 11px;
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, .66);
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.tabs .tab-btn:hover { color: #fff; }
+.tabs .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+/* ===== Tata letak & judul ===== */
+.layout { max-width: 1180px; margin: 0 auto; padding: 30px 24px 72px; }
+
+.page-title { margin: 0 0 6px; font-size: 26px; font-weight: 750; letter-spacing: -.025em; line-height: 1.2; }
+.page-sub { margin: 0 0 24px; max-width: 760px; color: var(--muted); font-size: 14px; }
+
+/* ===== Panel ===== */
+.panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.panel-head h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+
+/* ===== Tabel ===== */
+.table-scroll { overflow-x: auto; }
+
+table.data-table,
+table.vtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+table.data-table thead th,
+table.vtable thead th {
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--line);
+}
+
+table.data-table tbody td,
+table.vtable tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+}
+
+table.data-table tbody tr:hover,
+table.vtable tbody tr:hover { background: #faf9f5; }
+
+table.data-table tfoot td { padding: 11px 12px; font-weight: 700; border-top: 2px solid var(--line); }
+
+.empty-row td { text-align: center; color: var(--muted); padding: 28px !important; }
+.t-right,
+table.data-table th.t-right,
+table.vtable th.t-right { text-align: right; }
+
+/* ===== Chip & badge status ===== */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.chip,
+.badge-status {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    background: var(--line-soft);
+    color: var(--ink-soft);
+}
+
+.chip.ok, .b-accepted { background: var(--ok-bg); color: var(--ok-text); }
+.chip.warn, .b-pending { background: var(--warn-bg); color: var(--warn-text); }
+.chip.fail, .b-declined { background: var(--error-bg); color: var(--error-text); }
+.chip.muted-chip { background: var(--line-soft); color: var(--muted); }
+
+/* ===== Tombol ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font-size: 13.5px;
+    font-weight: 650;
+    line-height: 1.3;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, transform .05s;
+}
+
+.btn:hover:not(:disabled) { border-color: #cfcabb; background: #fbfaf6; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.btn-primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--ink-hover); border-color: var(--ink-hover); }
+
+.btn-ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-text); }
+.btn-ok:hover:not(:disabled) { background: #d6ecdf; border-color: #9fd2b3; }
+
+.btn-danger-soft { background: var(--error-bg); border-color: var(--error-border); color: var(--error-text); }
+.btn-danger-soft:hover:not(:disabled) { background: #f6dedc; border-color: #e5aaa6; }
+
+.btn-ghost { background: transparent; }
+.btn-ghost-danger { background: transparent; color: var(--error-text); }
+.btn-ghost-danger:hover:not(:disabled) { background: var(--error-bg); border-color: var(--error-border); }
+
+.btn-sm { padding: 6px 10px; font-size: 12.5px; }
+td .btn-sm + .btn-sm { margin-left: 4px; }
+
+/* ===== Form ===== */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12.5px; font-weight: 650; color: var(--ink-soft); }
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.field input::placeholder { color: #a3a6ae; }
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ring); }
+
+.field input:disabled,
+.field select:disabled,
+.field input[readonly] { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+
+.hint { font-size: 12px; line-height: 1.45; color: var(--muted); }
+
+/* ===== Segmented control ===== */
+.seg {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+}
+
+.seg button {
+    border: 0;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.seg button:hover { color: var(--text); }
+.seg button.active { background: var(--ink); color: #fff; }
+.seg button .chip { margin-left: 4px; }
+
+/* ===== Pesan ===== */
+.msgbox {
+    padding: 11px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    border-left-width: 4px;
+    font-size: 13.5px;
+}
+
+.msgbox.error { background: var(--error-bg); border-color: var(--error-border); border-left-color: var(--error-text); color: var(--error-text); }
+.msgbox.ok { background: var(--ok-bg); border-color: var(--ok-border); border-left-color: var(--ok-text); color: var(--ok-text); }
+
+/* ===== Utilitas ===== */
+.muted { color: var(--muted); font-size: 12.5px; }
+.hide { display: none !important; }
+a.link { color: var(--ink); font-weight: 650; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a.link:hover { text-decoration-color: var(--ink); }
+.num { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; }
+    .tabs { padding: 0 8px; }
+    .layout { padding: 22px 16px 60px; }
+    .page-title { font-size: 22px; }
+    .panel { padding: 16px; }
+}
