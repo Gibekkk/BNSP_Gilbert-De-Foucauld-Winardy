@@ -249,9 +249,9 @@
             data: {
                 labels: rows.map(chartLabel),
                 datasets: [
-                    { label: 'Biaya sewa', data: rows.map((r) => r.rent_income), backgroundColor: '#13213a', stack: 'pendapatan' },
-                    { label: 'Isi listrik', data: rows.map((r) => r.charge_income), backgroundColor: '#2f8f5b', stack: 'pendapatan' },
-                    { label: 'Perpanjangan', data: rows.map((r) => r.extension_income), backgroundColor: '#f2b705', stack: 'pendapatan' },
+                    { label: 'Biaya sewa', data: rows.map((r) => r.rent_income), backgroundColor: '#7f9cd6', stack: 'pendapatan' },
+                    { label: 'Isi listrik', data: rows.map((r) => r.charge_income), backgroundColor: '#3fbf7f', stack: 'pendapatan' },
+                    { label: 'Perpanjangan', data: rows.map((r) => r.extension_income), backgroundColor: '#f5c033', stack: 'pendapatan' },
                 ],
             },
             options: {
@@ -271,7 +271,9 @@
 
         // Grafik memakai font aplikasi (Plus Jakarta Sans), bukan font bawaan Chart.js.
         window.Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
-        window.Chart.defaults.color = '#6a7080';
+        // Warna teks & garis grafik untuk tema gelap.
+        window.Chart.defaults.color = '#8a96ad';
+        window.Chart.defaults.borderColor = 'rgba(255, 255, 255, .07)';
 
         if (chart) {
             chart.destroy();

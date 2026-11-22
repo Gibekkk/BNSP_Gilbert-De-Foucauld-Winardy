@@ -266,6 +266,15 @@
                 const SECTION_IDS = { garage: '#tab-garage', kendaraan: '#tab-kendaraan' };
 
                 function showTab(name) {
+                    // Form tambah/ubah milik tab lain ditutup saat berpindah tab,
+                    // agar tidak tetap tampil di tab yang baru dibuka.
+                    if (name !== 'kendaraan' && !$('#veh-form-panel').hidden) {
+                        closeForm();
+                    }
+                    if (name !== 'garage' && !$('#rent-panel').hidden) {
+                        closeRent();
+                    }
+
                     Object.entries(SECTION_IDS).forEach(([key, sel]) => { $(sel).hidden = key !== name; });
                     document.querySelectorAll('.tab-btn').forEach((btn) => {
                         btn.classList.toggle('active', btn.dataset.tab === name);

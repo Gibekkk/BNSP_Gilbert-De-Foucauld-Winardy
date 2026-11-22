@@ -1,6 +1,6 @@
 /* =====================================================================
    Sewa Garasi · halaman masuk & daftar (dimuat setelah app.css)
-   Latar biru aspal dengan marka parkir diagonal, kartu putih di tengah.
+   Latar aspal malam dengan marka parkir diagonal, kartu gelap di tengah.
    ===================================================================== */
 
 body {
@@ -9,7 +9,7 @@ body {
     justify-content: center;
     padding: 40px 20px;
     background:
-        repeating-linear-gradient(135deg, rgba(242, 183, 5, .07) 0 22px, transparent 22px 64px),
+        repeating-linear-gradient(135deg, rgba(245, 192, 51, .05) 0 22px, transparent 22px 64px),
         var(--ink);
 }
 
@@ -30,8 +30,9 @@ body {
 .card {
     background: var(--card);
     border-radius: 14px;
+    border: 1px solid var(--line);
     border-top: 5px solid var(--accent);
-    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .55);
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .8);
     padding: 30px 30px 26px;
 }
 
@@ -64,7 +65,7 @@ form .field { margin-bottom: 14px; }
 .hint { margin-top: 20px; font-size: 13px; text-align: center; }
 
 .hint a,
-.back-link { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.back-link { color: var(--text); font-weight: 700; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 
 /* Pemisah data diri / data akun pada form daftar */
 .sep { border: none; border-top: 1px dashed var(--line); margin: 6px 0 16px; }
@@ -82,7 +83,7 @@ form .field { margin-bottom: 14px; }
     place-items: center;
     font-size: 24px;
     font-weight: 800;
-    color: var(--ink);
+    color: var(--accent-ink);
     background: var(--accent);
 }
 
